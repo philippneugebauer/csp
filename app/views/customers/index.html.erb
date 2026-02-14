@@ -12,6 +12,42 @@
     <% end %>
   </div>
 
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <%= form_with url: customers_path, method: :get do |form| %>
+        <div class="row g-2">
+          <div class="col-md-3">
+            <%= form.text_field :name, value: @name_query, class: "form-control", placeholder: "Filter by customer name" %>
+          </div>
+          <div class="col-md-3">
+            <%= form.collection_select :customer_success_manager_id,
+              @customer_success_managers,
+              :id,
+              :full_name,
+              { include_blank: "All CSMs", selected: @customer_success_manager_id },
+              { class: "form-select" } %>
+          </div>
+          <div class="col-md-2">
+            <%= form.select :stage,
+              options_for_select(Customer.stages.keys.map { |value| [ value.humanize, value ] }, @stage_filter),
+              { include_blank: "All stages" },
+              { class: "form-select" } %>
+          </div>
+          <div class="col-md-2">
+            <%= form.select :churn_risk,
+              options_for_select(Customer.churn_risks.keys.map { |value| [ value.humanize, value ] }, @churn_risk_filter),
+              { include_blank: "All risks" },
+              { class: "form-select" } %>
+          </div>
+          <div class="col-md-2 d-flex gap-2">
+            <%= form.submit "Filter", class: "btn btn-primary w-100" %>
+            <%= link_to "Reset", customers_path, class: "btn btn-outline-secondary w-100" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
   <div class="card shadow-sm overflow-hidden">
     <% if @customers.any? %>
       <div class="table-responsive">

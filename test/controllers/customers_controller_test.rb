@@ -11,6 +11,21 @@ class CustomersControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "should filter index by name csm stage and churn risk" do
+    manager = customer_success_managers(:two)
+
+    get customers_url, params: {
+      name: "Glob",
+      customer_success_manager_id: manager.id,
+      stage: "renewal",
+      churn_risk: "high"
+    }
+
+    assert_response :success
+    assert_includes response.body, "Globex"
+    assert_not_includes response.body, "Acme Inc"
+  end
+
   test "should get new" do
     get new_customer_url
     assert_response :success

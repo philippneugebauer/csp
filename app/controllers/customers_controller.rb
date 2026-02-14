@@ -3,7 +3,31 @@ class CustomersController < ApplicationController
 
   # GET /customers or /customers.json
   def index
+    @customer_success_managers = CustomerSuccessManager.order(:first_name, :last_name)
+
+    @name_query = params[:name].to_s.strip
+    @customer_success_manager_id = params[:customer_success_manager_id].to_s
+    @stage_filter = params[:stage].to_s
+    @churn_risk_filter = params[:churn_risk].to_s
+
     @customers = Customer.includes(:customer_success_manager).order(:name)
+
+    if @name_query.present?
+      escaped_name = ActiveRecord::Base.sanitize_sql_like(@name_query)
+      @customers = @customers.where("customers.name LIKE ?", "%#{escaped_name}%")
+    end
+
+    if @customer_success_manager_id.present?
+      @customers = @customers.where(customer_success_manager_id: @customer_success_manager_id)
+    end
+
+    if Customer.stages.key?(@stage_filter)
+      @customers = @customers.where(stage: Customer.stages[@stage_filter])
+    end
+
+    if Customer.churn_risks.key?(@churn_risk_filter)
+      @customers = @customers.where(churn_risk: Customer.churn_risks[@churn_risk_filter])
+    end
   end
 
   # GET /customers/1 or /customers/1.json
