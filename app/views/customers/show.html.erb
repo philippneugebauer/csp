@@ -46,10 +46,10 @@
   <div class="card shadow-sm mb-3">
     <div class="card-header bg-body-tertiary fw-semibold">Add CSM note</div>
     <div class="card-body">
-      <%= form_with(model: [@customer, @customer_note]) do |form| %>
+      <%= form_with(model: [@customer, @customer_note], data: { turbo_temporary: true }) do |form| %>
         <div class="row g-3">
           <div class="col-12">
-            <%= form.text_area :body, class: "form-control", rows: 3, required: true, placeholder: "Add a note..." %>
+            <%= form.text_area :body, class: "form-control", rows: 3, required: true, placeholder: "Add a note...", autocomplete: "off", data: { turbo_temporary: true } %>
           </div>
         </div>
         <div class="mt-3">
