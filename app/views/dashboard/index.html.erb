@@ -1,0 +1,135 @@
+<% content_for :title, "Dashboard" %>
+
+<div class="container py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <h1 class="h2 mb-0">Customer Success Dashboard</h1>
+    <div class="d-flex gap-2">
+      <%= link_to customers_path, class: "btn btn-outline-primary" do %>
+        <i class="bi bi-people me-1"></i>All customers
+      <% end %>
+      <%= link_to new_customer_path, class: "btn btn-primary" do %>
+        <i class="bi bi-plus-lg me-1"></i>New customer
+      <% end %>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-body-secondary small">Total customers</div>
+          <div class="display-6 fw-semibold"><%= @customers_count %></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-body-secondary small">High churn risk</div>
+          <div class="display-6 fw-semibold text-danger"><%= @high_risk_count %></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-body-secondary small">In renewal stage</div>
+          <div class="display-6 fw-semibold"><%= @renewal_count %></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-body-secondary small">Total CSM notes</div>
+          <div class="display-6 fw-semibold"><%= CustomerNote.count %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-body-tertiary fw-semibold">Customers by stage</div>
+        <ul class="list-group list-group-flush">
+          <% Customer.stages.keys.each do |stage_key| %>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span><%= stage_key.humanize %></span>
+              <span class="badge text-bg-secondary"><%= @customers_by_stage.fetch(stage_key, 0) %></span>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-body-tertiary fw-semibold">Customers by churn risk</div>
+        <ul class="list-group list-group-flush">
+          <% Customer.churn_risks.keys.each do |risk_key| %>
+            <% badge_class = risk_key == "high" ? "text-bg-danger" : risk_key == "medium" ? "text-bg-warning" : "text-bg-success" %>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span><%= risk_key.humanize %></span>
+              <span class="badge <%= badge_class %>"><%= @customers_by_risk.fetch(risk_key, 0) %></span>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="card shadow-sm h-100 overflow-hidden">
+        <div class="card-header bg-body-tertiary fw-semibold">At-risk customers</div>
+        <% if @at_risk_customers.any? %>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Customer</th>
+                  <th>CSM</th>
+                  <th class="text-end"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @at_risk_customers.each do |customer| %>
+                  <tr>
+                    <td>
+                      <div class="fw-semibold"><%= customer.name %></div>
+                      <div class="small text-body-secondary"><%= customer.primary_contact_email %></div>
+                    </td>
+                    <td><%= customer.customer_success_manager.full_name %></td>
+                    <td class="text-end"><%= link_to "Open", customer_path(customer), class: "btn btn-sm btn-outline-primary" %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <div class="card-body text-body-secondary">No high-risk customers.</div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-body-tertiary fw-semibold">Recent notes</div>
+        <ul class="list-group list-group-flush">
+          <% @recent_notes.each do |note| %>
+            <li class="list-group-item">
+              <div class="small text-body-secondary mb-1">
+                <%= note.customer.name %> · <%= note.customer_success_manager.full_name %> · <%= l(note.noted_at, format: :short) %>
+              </div>
+              <div><%= truncate(note.body, length: 140) %></div>
+            </li>
+          <% end %>
+          <% if @recent_notes.empty? %>
+            <li class="list-group-item text-body-secondary">No notes yet.</li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
