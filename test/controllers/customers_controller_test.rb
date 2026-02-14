@@ -119,6 +119,9 @@ class CustomersControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Update"
     assert_includes response.body, "Name"
     assert_includes response.body, "Acme Updated"
+    assert_not_includes response.body, "Stage"
+    assert_not_includes response.body, "Churn risk"
+    assert_not_includes response.body, "Contact persons"
   end
 
   test "should hide completed tasks by default and show when requested" do

@@ -127,7 +127,8 @@ class CustomersController < ApplicationController
       .transform_values(&:full_name)
     @version_changes = versions_asc.each_with_index.each_with_object({}) do |(version, index), hash|
       changes = version.changeset.to_h.except("created_at", "updated_at")
-      hash[version.id] = changes.presence || computed_version_changes(version:, versions_asc:, index:)
+      sanitized_changes = sanitize_changes(changes)
+      hash[version.id] = sanitized_changes.presence || computed_version_changes(version:, versions_asc:, index:)
     end
   end
 
@@ -189,13 +190,15 @@ class CustomersController < ApplicationController
       ignored_keys = %w[created_at updated_at]
       candidate_keys = (before_attributes.keys | after_attributes.keys) - ignored_keys
 
-      candidate_keys.each_with_object({}) do |attribute, changes|
+      raw_changes = candidate_keys.each_with_object({}) do |attribute, changes|
         from = before_attributes[attribute]
         to = after_attributes[attribute]
         next if from == to
 
         changes[attribute] = [ from, to ]
       end
+
+      sanitize_changes(raw_changes)
     end
 
     def deserialize_version_object(raw_object)
@@ -209,5 +212,39 @@ class CustomersController < ApplicationController
       YAML.unsafe_load(raw_object).to_h
     rescue StandardError
       {}
+    end
+
+    def sanitize_changes(changes)
+      changes.each_with_object({}) do |(attribute, values), sanitized|
+        from, to = Array(values)
+        normalized_from = normalize_attribute_value(attribute, from)
+        normalized_to = normalize_attribute_value(attribute, to)
+        next if normalized_from == normalized_to
+
+        sanitized[attribute] = [ normalized_from, normalized_to ]
+      end
+    end
+
+    def normalize_attribute_value(attribute, value)
+      return nil if value.nil?
+
+      enum_mapping = @customer.class.defined_enums[attribute.to_s]
+      if enum_mapping.present?
+        return value if enum_mapping.key?(value.to_s)
+
+        integer_value = Integer(value, exception: false)
+        return enum_mapping.key(integer_value) if integer_value
+      end
+
+      type = @customer.class.type_for_attribute(attribute.to_s)
+      if type.is_a?(ActiveRecord::Type::Json) && value.is_a?(String)
+        begin
+          return JSON.parse(value)
+        rescue JSON::ParserError
+          return value
+        end
+      end
+
+      value
     end
 end
