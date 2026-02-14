@@ -9,6 +9,14 @@
       <%= link_to customers_path, class: "btn btn-outline-primary" do %>
         <i class="bi bi-arrow-left me-1"></i>Back
       <% end %>
+      <button
+        class="btn btn-outline-primary"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#uploadDocumentModal"
+      >
+        <i class="bi bi-file-earmark-arrow-up me-1"></i>Upload document
+      </button>
       <%= button_to sync_emails_customer_path(@customer), method: :post, class: "btn btn-outline-secondary" do %>
         <i class="bi bi-envelope-arrow-down me-1"></i>Sync Gmail
       <% end %>
@@ -80,6 +88,35 @@
   </div>
 
   <div class="card shadow-sm mb-3">
+    <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center gap-2">
+      <span class="fw-semibold">Task</span>
+      <button
+        class="btn btn-sm btn-outline-primary"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#addTaskModal"
+      >
+        <i class="bi bi-list-check me-1"></i>Add task
+      </button>
+    </div>
+    <ul class="list-group list-group-flush">
+      <% @task_activities.each do |task| %>
+        <li class="list-group-item d-flex justify-content-between align-items-start gap-3">
+          <div>
+            <div class="mb-1"><span class="badge text-bg-dark">Task</span></div>
+            <div><%= simple_format(task.body) %></div>
+            <div class="small text-body-secondary"><%= task.customer_success_manager.full_name %></div>
+          </div>
+          <div class="small text-body-secondary text-nowrap"><%= l(task.occurred_at, format: :short) %></div>
+        </li>
+      <% end %>
+      <% if @task_activities.empty? %>
+        <li class="list-group-item text-body-secondary">No tasks yet.</li>
+      <% end %>
+    </ul>
+  </div>
+
+  <div class="card shadow-sm mb-3">
     <div class="card-header bg-body-tertiary fw-semibold">Add CSM note</div>
     <div class="card-body">
       <%= form_with(url: customer_customer_notes_path(@customer), scope: :customer_note, data: { turbo_temporary: true }) do |form| %>
@@ -101,6 +138,7 @@
       <div class="btn-group btn-group-sm" role="group" aria-label="Activity type filter">
         <%= link_to "All", customer_path(@customer, activity_type: "all", email_direction: @email_direction), class: "btn #{@activity_type == "all" ? "btn-primary" : "btn-outline-primary"}" %>
         <%= link_to "Notes", customer_path(@customer, activity_type: "notes"), class: "btn #{@activity_type == "notes" ? "btn-primary" : "btn-outline-primary"}" %>
+        <%= link_to "Documents", customer_path(@customer, activity_type: "documents"), class: "btn #{@activity_type == "documents" ? "btn-primary" : "btn-outline-primary"}" %>
         <%= link_to "Emails", customer_path(@customer, activity_type: "emails", email_direction: "all"), class: "btn #{@activity_type == "emails" && @email_direction == "all" ? "btn-primary" : "btn-outline-primary"}" %>
         <%= link_to "Inbound", customer_path(@customer, activity_type: "emails", email_direction: "inbound"), class: "btn #{@activity_type == "emails" && @email_direction == "inbound" ? "btn-primary" : "btn-outline-primary"}" %>
         <%= link_to "Outbound", customer_path(@customer, activity_type: "emails", email_direction: "outbound"), class: "btn #{@activity_type == "emails" && @email_direction == "outbound" ? "btn-primary" : "btn-outline-primary"}" %>
@@ -113,9 +151,20 @@
           <div class="list-group-item">
             <div class="d-flex justify-content-between align-items-start gap-3">
               <div>
-                <div class="mb-1"><span class="badge text-bg-secondary">Note</span></div>
+                <div class="mb-1">
+                  <span class="badge <%= activity.documents.attached? ? "text-bg-primary" : "text-bg-secondary" %>">
+                    <%= activity.documents.attached? ? "Document" : "Note" %>
+                  </span>
+                </div>
                 <div><%= simple_format(activity.body) %></div>
                 <div class="small text-body-secondary"><%= activity.customer_success_manager.full_name %></div>
+                <% if activity.documents.attached? %>
+                  <div class="small mt-2">
+                    <% activity.documents.each do |document| %>
+                      <%= link_to document.filename.to_s, url_for(document), class: "link-primary me-3", target: "_blank", rel: "noopener" %>
+                    <% end %>
+                  </div>
+                <% end %>
               </div>
               <div class="small text-body-secondary text-nowrap"><%= l(activity.occurred_at, format: :short) %></div>
             </div>
@@ -136,6 +185,13 @@
                 <div class="small text-body-secondary">
                   <strong>From:</strong> <%= activity.from_email %> · <strong>To:</strong> <%= activity.to_email %>
                 </div>
+                <% if activity.documents.attached? %>
+                  <div class="small mt-2">
+                    <% activity.documents.each do |document| %>
+                      <%= link_to document.filename.to_s, url_for(document), class: "link-primary me-3", target: "_blank", rel: "noopener" %>
+                    <% end %>
+                  </div>
+                <% end %>
               </div>
               <div class="small text-body-secondary text-nowrap"><%= l(activity.occurred_at, format: :short) %></div>
             </div>
@@ -146,6 +202,76 @@
       <% if @activities.empty? %>
         <div class="list-group-item text-body-secondary">No activity found for this filter.</div>
       <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="uploadDocumentModal" tabindex="-1" aria-labelledby="uploadDocumentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="uploadDocumentModalLabel">Upload document activity</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <%= form_with(
+          url: customer_customer_documents_path(@customer),
+          scope: :customer_document,
+          data: {
+            turbo_temporary: true,
+            controller: "transient-form",
+            action: "turbo:submit-end->transient-form#resetOnSuccess turbo:before-cache@document->transient-form#reset"
+          }
+        ) do |form| %>
+          <div class="row g-3">
+            <div class="col-12">
+              <%= form.label :documents, "Documents", class: "form-label" %>
+              <%= form.file_field :documents, multiple: true, required: true, class: "form-control", direct_upload: true, data: { turbo_temporary: true } %>
+            </div>
+            <div class="col-12">
+              <%= form.label :comment, "Comment (optional)", class: "form-label" %>
+              <%= form.text_area :comment, rows: 3, class: "form-control", placeholder: "Add context for this upload...", autocomplete: "off", data: { turbo_temporary: true } %>
+            </div>
+          </div>
+          <div class="mt-3 d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <%= form.submit "Add document activity", class: "btn btn-primary" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="addTaskModalLabel">Add task</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <%= form_with(
+          url: customer_customer_tasks_path(@customer),
+          scope: :customer_task,
+          data: {
+            turbo_temporary: true,
+            controller: "transient-form",
+            action: "turbo:submit-end->transient-form#resetOnSuccess turbo:before-cache@document->transient-form#reset"
+          }
+        ) do |form| %>
+          <div class="row g-3">
+            <div class="col-12">
+              <%= form.label :body, "Task", class: "form-label" %>
+              <%= form.text_area :body, class: "form-control", rows: 3, required: true, placeholder: "Add a task...", autocomplete: "off", data: { turbo_temporary: true } %>
+            </div>
+          </div>
+          <div class="mt-3 d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <%= form.submit "Add task", class: "btn btn-primary" %>
+          </div>
+        <% end %>
+      </div>
     </div>
   </div>
 </div>

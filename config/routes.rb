@@ -5,6 +5,8 @@ Rails.application.routes.draw do
 
   resources :customers do
     resources :customer_notes, only: :create
+    resources :customer_documents, only: :create
+    resources :customer_tasks, only: :create
     post :sync_emails, on: :member
   end
   resources :customer_success_managers

@@ -32,7 +32,7 @@ class CustomersController < ApplicationController
 
   # GET /customers/1 or /customers/1.json
   def show
-    @activity_type = params[:activity_type].presence_in(%w[all notes emails]) || "all"
+    @activity_type = params[:activity_type].presence_in(%w[all notes documents emails]) || "all"
     @email_direction = params[:email_direction].presence_in(%w[all inbound outbound]) || "all"
 
     @customer_note = NoteActivity.new(
@@ -40,9 +40,24 @@ class CustomersController < ApplicationController
       customer_success_manager: current_customer_success_manager,
       occurred_at: Time.current
     )
+    @customer_task = TaskActivity.new(
+      customer: @customer,
+      customer_success_manager: current_customer_success_manager,
+      occurred_at: Time.current
+    )
+    @task_activities = @customer.activities.where(type: "TaskActivity").includes(:customer_success_manager).recent_first.limit(10)
 
-    @activities = @customer.activities.includes(:customer_success_manager).recent_first
-    @activities = @activities.where(type: "NoteActivity") if @activity_type == "notes"
+    @activities = @customer.activities
+      .where.not(type: "TaskActivity")
+      .includes(:customer_success_manager, documents_attachments: :blob)
+      .recent_first
+
+    if @activity_type == "notes"
+      @activities = @activities.where(type: "NoteActivity").where.missing(:documents_attachments)
+    elsif @activity_type == "documents"
+      @activities = @activities.where(type: "NoteActivity").where.associated(:documents_attachments).distinct
+    end
+
     if @activity_type == "emails"
       @activities = @activities.where(type: "EmailActivity")
       @activities = @activities.public_send(@email_direction) if @email_direction != "all"
