@@ -1,11 +1,14 @@
 <%% content_for :title, "New <%= human_name.downcase %>" %>
 
-<h1>New <%= human_name.downcase %></h1>
+<div class="container py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h2 mb-0">New <%= human_name.downcase %></h1>
+    <%%= link_to "Back", <%= index_helper(type: :path) %>, class: "btn btn-outline-secondary" %>
+  </div>
 
-<%%= render "form", <%= singular_table_name %>: @<%= singular_table_name %> %>
-
-<br>
-
-<div>
-  <%%= link_to "Back to <%= human_name.pluralize.downcase %>", <%= index_helper(type: :path) %> %>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <%%= render "form", <%= singular_table_name %>: @<%= singular_table_name %> %>
+    </div>
+  </div>
 </div>

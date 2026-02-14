@@ -1,9 +1,8 @@
 <%%= form_with(model: <%= model_resource_name %>) do |form| %>
   <%% if <%= singular_table_name %>.errors.any? %>
-    <div style="color: red">
-      <h2><%%= pluralize(<%= singular_table_name %>.errors.count, "error") %> prohibited this <%= singular_table_name %> from being saved:</h2>
-
-      <ul>
+    <div class="alert alert-danger" role="alert">
+      <h2 class="h6 mb-2"><%%= pluralize(<%= singular_table_name %>.errors.count, "error") %> prohibited this <%= singular_table_name %> from being saved:</h2>
+      <ul class="mb-0">
         <%% <%= singular_table_name %>.errors.each do |error| %>
           <li><%%= error.full_message %></li>
         <%% end %>
@@ -12,26 +11,31 @@
   <%% end %>
 
 <% attributes.each do |attribute| -%>
-  <div>
+  <div class="mb-3">
 <% if attribute.password_digest? -%>
-    <%%= form.label :password, style: "display: block" %>
-    <%%= form.password_field :password %>
+    <%%= form.label :password, class: "form-label" %>
+    <%%= form.password_field :password, class: "form-control" %>
   </div>
 
-  <div>
-    <%%= form.label :password_confirmation, style: "display: block" %>
-    <%%= form.password_field :password_confirmation %>
+  <div class="mb-3">
+    <%%= form.label :password_confirmation, class: "form-label" %>
+    <%%= form.password_field :password_confirmation, class: "form-control" %>
 <% elsif attribute.attachments? -%>
-    <%%= form.label :<%= attribute.column_name %>, style: "display: block" %>
-    <%%= form.<%= attribute.field_type %> :<%= attribute.column_name %>, multiple: true %>
+    <%%= form.label :<%= attribute.column_name %>, class: "form-label" %>
+    <%%= form.<%= attribute.field_type %> :<%= attribute.column_name %>, multiple: true, class: "form-control" %>
+<% elsif attribute.field_type.to_s == "check_box" -%>
+    <div class="form-check">
+      <%%= form.check_box :<%= attribute.column_name %>, class: "form-check-input" %>
+      <%%= form.label :<%= attribute.column_name %>, class: "form-check-label" %>
+    </div>
 <% else -%>
-    <%%= form.label :<%= attribute.column_name %>, style: "display: block" %>
-    <%%= form.<%= attribute.field_type %> :<%= attribute.column_name %> %>
+    <%%= form.label :<%= attribute.column_name %>, class: "form-label" %>
+    <%%= form.<%= attribute.field_type %> :<%= attribute.column_name %>, class: "form-control" %>
 <% end -%>
   </div>
 
 <% end -%>
-  <div>
-    <%%= form.submit %>
+  <div class="d-flex gap-2">
+    <%%= form.submit class: "btn btn-primary" %>
   </div>
 <%% end %>

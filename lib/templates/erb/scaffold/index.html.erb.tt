@@ -1,16 +1,58 @@
-<p style="color: green"><%%= notice %></p>
-
 <%% content_for :title, "<%= human_name.pluralize %>" %>
 
-<h1><%= human_name.pluralize %></h1>
-
-<div id="<%= plural_table_name %>">
-  <%% @<%= plural_table_name %>.each do |<%= singular_table_name %>| %>
-    <%%= render <%= singular_table_name %> %>
-    <p>
-      <%%= link_to "Show this <%= human_name.downcase %>", <%= model_resource_name(singular_table_name) %> %>
-    </p>
+<div class="container py-4">
+  <%% if notice.present? %>
+    <div class="alert alert-success" role="alert"><%%= notice %></div>
   <%% end %>
-</div>
 
-<%%= link_to "New <%= human_name.downcase %>", <%= new_helper(type: :path) %> %>
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h2 mb-0"><%= human_name.pluralize %></h1>
+    <%%= link_to "New <%= human_name.downcase %>", <%= new_helper(type: :path) %>, class: "btn btn-primary" %>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <%% if @<%= plural_table_name %>.any? %>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+<% attributes.reject(&:password_digest?).each do |attribute| -%>
+                <th scope="col"><%= attribute.human_name %></th>
+<% end -%>
+                <th scope="col" class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="<%= plural_table_name %>">
+              <%% @<%= plural_table_name %>.each do |<%= singular_table_name %>| %>
+                <tr id="<%%= dom_id <%= singular_table_name %> %>">
+<% attributes.reject(&:password_digest?).each do |attribute| -%>
+                  <td>
+<% if attribute.attachment? -%>
+                    <%%= link_to <%= singular_table_name %>.<%= attribute.column_name %>.filename, <%= singular_table_name %>.<%= attribute.column_name %> if <%= singular_table_name %>.<%= attribute.column_name %>.attached? %>
+<% elsif attribute.attachments? -%>
+                    <%%= <%= singular_table_name %>.<%= attribute.column_name %>.size %> files
+<% else -%>
+                    <%%= <%= singular_table_name %>.<%= attribute.column_name %> %>
+<% end -%>
+                  </td>
+<% end -%>
+                  <td class="text-end">
+                    <div class="btn-group btn-group-sm" role="group" aria-label="<%= human_name %> actions">
+                      <%%= link_to "Show", <%= model_resource_name(singular_table_name) %>, class: "btn btn-outline-primary" %>
+                      <%%= link_to "Edit", <%= edit_helper(model_resource_name(singular_table_name), type: :path) %>, class: "btn btn-outline-secondary" %>
+                    </div>
+                  </td>
+                </tr>
+              <%% end %>
+            </tbody>
+          </table>
+        </div>
+      <%% else %>
+        <div class="p-4 text-center text-body-secondary">
+          No <%= human_name.pluralize.downcase %> found.
+        </div>
+      <%% end %>
+    </div>
+  </div>
+</div>
