@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  resources :customers do
+    resources :customer_notes, only: :create
+    post :sync_emails, on: :member
+  end
   resources :customer_success_managers
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -11,5 +15,5 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Defines the root path route ("/")
-  # root "posts#index"
+  root "customers#index"
 end

@@ -1,0 +1,29 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  customer: one
+  customer_success_manager: one
+  gmail_message_id: message-1
+  gmail_thread_id: thread-1
+  direction: inbound
+  subject: Intro
+  from_email: contact1@example.com
+  to_email: csm1@example.com
+  snippet: MyText
+  body_text: MyText
+  sent_at: 2026-02-14 17:42:29
+  metadata: {}
+
+two:
+  customer: two
+  customer_success_manager: two
+  gmail_message_id: message-2
+  gmail_thread_id: thread-2
+  direction: outbound
+  subject: Follow up
+  from_email: csm2@example.com
+  to_email: contact2@example.com
+  snippet: MyText
+  body_text: MyText
+  sent_at: 2026-02-14 17:42:29
+  metadata: {}

@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  customer: one
+  customer_success_manager: one
+  body: MyText
+  noted_at: 2026-02-14 17:42:29
+
+two:
+  customer: two
+  customer_success_manager: two
+  body: MyText
+  noted_at: 2026-02-14 17:42:29

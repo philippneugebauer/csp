@@ -1,0 +1,21 @@
+<div id="<%= dom_id customer %>">
+  <dl class="row mb-0">
+    <dt class="col-sm-4">Name</dt>
+    <dd class="col-sm-8"><%= customer.name %></dd>
+
+    <dt class="col-sm-4">Primary contact email</dt>
+    <dd class="col-sm-8"><%= customer.primary_contact_email %></dd>
+
+    <dt class="col-sm-4">Stage</dt>
+    <dd class="col-sm-8"><span class="badge text-bg-secondary"><%= customer.stage.humanize %></span></dd>
+
+    <dt class="col-sm-4">Churn risk</dt>
+    <dd class="col-sm-8">
+      <% risk_badge_class = customer.high? ? "text-bg-danger" : customer.medium? ? "text-bg-warning" : "text-bg-success" %>
+      <span class="badge <%= risk_badge_class %>"><%= customer.churn_risk.humanize %></span>
+    </dd>
+
+    <dt class="col-sm-4">Customer success manager</dt>
+    <dd class="col-sm-8"><%= customer.customer_success_manager.full_name %> (<%= customer.customer_success_manager.email %>)</dd>
+  </dl>
+</div>
