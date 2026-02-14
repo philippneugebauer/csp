@@ -73,7 +73,7 @@
             <%= link_to @customer.customer_success_manager.full_name, customer_success_manager_path(@customer.customer_success_manager), class: "link-primary text-decoration-none" %>
           </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-3">
           <div class="text-body-secondary small">Contract period</div>
           <div class="fw-semibold">
             <% if @customer.contract_start_date.present? || @customer.contract_termination_date.present? %>
@@ -85,7 +85,7 @@
             <% end %>
           </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-3">
           <div class="text-body-secondary small">Contact persons</div>
           <% if @customer.customer_contacts.any? %>
             <div class="fw-semibold">
@@ -96,6 +96,36 @@
           <% else %>
             <div class="fw-semibold">-</div>
           <% end %>
+        </div>
+        <div class="col-md-3">
+          <div class="text-body-secondary small">Monthly engagement</div>
+          <% monthly_percentage = @customer.monthly_engagement_percentage %>
+          <% monthly_target = @customer.travel_budget.present? ? (@customer.travel_budget.to_d / 12) : nil %>
+          <div class="fw-semibold">
+            <% if monthly_percentage.present? && monthly_target.present? %>
+              <%= number_to_percentage(monthly_percentage, precision: 1) %>
+              <div class="small text-body-secondary">
+                <%= number_to_currency(@customer.monthly_gmv_total) %> / <%= number_to_currency(monthly_target) %>
+              </div>
+            <% else %>
+              -
+            <% end %>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="text-body-secondary small">Quarterly engagement</div>
+          <% quarterly_percentage = @customer.quarterly_engagement_percentage %>
+          <% quarterly_target = @customer.travel_budget.present? ? (@customer.travel_budget.to_d / 4) : nil %>
+          <div class="fw-semibold">
+            <% if quarterly_percentage.present? && quarterly_target.present? %>
+              <%= number_to_percentage(quarterly_percentage, precision: 1) %>
+              <div class="small text-body-secondary">
+                <%= number_to_currency(@customer.quarterly_gmv_total) %> / <%= number_to_currency(quarterly_target) %>
+              </div>
+            <% else %>
+              -
+            <% end %>
+          </div>
         </div>
       </div>
     </div>

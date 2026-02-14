@@ -51,7 +51,45 @@ class Customer < ApplicationRecord
     customer_contacts.reject(&:marked_for_destruction?).first&.email || primary_contact_email
   end
 
+  def monthly_gmv_total(reference_date = Date.current)
+    gmv_total_for(reference_date.beginning_of_month..reference_date.end_of_month)
+  end
+
+  def quarterly_gmv_total(reference_date = Date.current)
+    gmv_total_for(reference_date.beginning_of_quarter..reference_date.end_of_quarter)
+  end
+
+  def monthly_engagement_percentage(reference_date = Date.current)
+    percentage_of_target(monthly_gmv_total(reference_date), monthly_travel_budget_target)
+  end
+
+  def quarterly_engagement_percentage(reference_date = Date.current)
+    percentage_of_target(quarterly_gmv_total(reference_date), quarterly_travel_budget_target)
+  end
+
   private
+    def gmv_total_for(range)
+      gmv_activities.where(gmv_on: range).sum(:gmv_revenue).to_d
+    end
+
+    def monthly_travel_budget_target
+      return if travel_budget.blank?
+
+      travel_budget.to_d / 12
+    end
+
+    def quarterly_travel_budget_target
+      return if travel_budget.blank?
+
+      travel_budget.to_d / 4
+    end
+
+    def percentage_of_target(actual, target)
+      return if target.blank? || target.zero?
+
+      ((actual.to_d / target.to_d) * 100).round(1)
+    end
+
     def compute_customer_segment
       self.customer_segment = if high?
         :d
