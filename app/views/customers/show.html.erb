@@ -13,7 +13,7 @@
       <%= button_to sync_emails_customer_path(@customer), method: :post, class: "btn btn-outline-secondary" do %>
         <i class="bi bi-envelope-arrow-down me-1"></i>Sync Gmail
       <% end %>
-      <%= link_to edit_customer_path(@customer), class: "btn btn-warning" do %>
+      <%= link_to edit_customer_path(@customer), class: "btn btn-outline-warning" do %>
         <i class="bi bi-pencil-square me-1"></i>Edit
       <% end %>
       <%= button_to @customer, method: :delete, class: "btn btn-outline-danger", form: { class: "d-inline" } do %>
@@ -36,8 +36,9 @@
         </div>
         <div class="col-md-4">
           <div class="text-body-secondary small">Customer Success Manager</div>
-          <div class="fw-semibold"><%= @customer.customer_success_manager.full_name %></div>
-          <div class="small text-body-secondary"><%= @customer.customer_success_manager.email %></div>
+          <div class="fw-semibold">
+            <%= link_to @customer.customer_success_manager.full_name, customer_success_manager_path(@customer.customer_success_manager), class: "link-primary text-decoration-none" %>
+          </div>
         </div>
       </div>
     </div>
