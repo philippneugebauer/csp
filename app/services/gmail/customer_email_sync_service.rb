@@ -14,7 +14,7 @@ module Gmail
 
     def sync!
       raise "GMAIL_ACCESS_TOKEN is missing" if @access_token.blank?
-      raise "Customer primary contact email is missing" if @customer.primary_contact_email.blank?
+      raise "Customer contact email is missing" if @customer@customer.sync_contact_email.blank?
 
       list = gmail_get("/messages", q: search_query, maxResults: 25)
       message_refs = list.fetch("messages", [])
@@ -63,7 +63,7 @@ module Gmail
       end
 
       def search_query
-        customer_email = @customer.primary_contact_email
+        customer_email = .sync_contact_email
         "(from:#{customer_email} OR to:#{customer_email}) newer_than:365d"
       end
 

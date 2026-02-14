@@ -3,7 +3,7 @@ class CustomersController < ApplicationController
 
   # GET /customers or /customers.json
   def index
-    @customer_success_managers = CustomerSuccessManager.order(:first_name, :last_name)
+    @customer_success_managers = CustomerSuccessManager.active.order(:first_name, :last_name)
 
     @name_query = params[:name].to_s.strip
     @customer_success_manager_id = params[:customer_success_manager_id].to_s
@@ -109,6 +109,24 @@ class CustomersController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def customer_params
-      params.expect(customer: [ :name, :primary_contact_email, :stage, :churn_risk, :customer_success_manager_id ])
+      permitted = params.require(:customer).permit(
+        :name,
+        :organization_id,
+        :stage,
+        :churn_risk,
+        :contract_start_date,
+        :contract_termination_date,
+        :travel_budget,
+        :customer_success_manager_id,
+        customer_contacts_attributes: {}
+      )
+
+      raw_contacts = permitted.delete(:customer_contacts_attributes) || {}
+      sanitized_contacts = raw_contacts.to_h.transform_values do |attrs|
+        attrs.to_h.slice("id", "name", "email", "_destroy")
+      end
+
+      permitted[:customer_contacts_attributes] = sanitized_contacts
+      permitted
     end
 end

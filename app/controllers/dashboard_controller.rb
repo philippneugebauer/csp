@@ -8,7 +8,7 @@ class DashboardController < ApplicationController
     @customers_by_risk = Customer.group(:churn_risk).count
 
     @at_risk_customers = Customer
-      .includes(:customer_success_manager)
+      .includes(:customer_success_manager, :customer_contacts)
       .high
       .order(updated_at: :desc)
       .limit(8)

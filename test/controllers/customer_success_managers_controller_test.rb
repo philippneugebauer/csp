@@ -56,10 +56,11 @@ class CustomerSuccessManagersControllerTest < ActionDispatch::IntegrationTest
   test "should destroy customer_success_manager" do
     manager = customer_success_managers(:two)
 
-    assert_difference("CustomerSuccessManager.count", -1) do
+    assert_no_difference("CustomerSuccessManager.count") do
       delete customer_success_manager_url(manager)
     end
 
+    assert manager.reload.deleted?
     assert_redirected_to customer_success_managers_url
   end
 

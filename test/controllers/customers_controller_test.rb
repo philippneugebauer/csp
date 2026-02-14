@@ -32,8 +32,38 @@ class CustomersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should create customer" do
-    assert_difference("Customer.count") do
-      post customers_url, params: { customer: { churn_risk: @customer.churn_risk, customer_success_manager_id: @customer.customer_success_manager_id, name: "NewCo", primary_contact_email: "newco@example.com", stage: @customer.stage } }
+    assert_difference([ "Customer.count", "CustomerContact.count" ], 1) do
+      post customers_url, params: {
+        customer: {
+          churn_risk: @customer.churn_risk,
+          customer_success_manager_id: @customer.customer_success_manager_id,
+          name: "NewCo",
+          stage: @customer.stage,
+          customer_contacts_attributes: {
+            "0" => { name: "Main Contact", email: "contact@newco.example" }
+          }
+        }
+      }
+    end
+
+    assert_redirected_to customer_url(Customer.last)
+  end
+
+  test "should create customer with dynamically keyed contact attributes" do
+    dynamic_key = "1700000000_1234"
+
+    assert_difference([ "Customer.count", "CustomerContact.count" ], 1) do
+      post customers_url, params: {
+        customer: {
+          name: "DynamicCo",
+          stage: @customer.stage,
+          churn_risk: @customer.churn_risk,
+          customer_success_manager_id: @customer.customer_success_manager_id,
+          customer_contacts_attributes: {
+            dynamic_key => { name: "Dynamic Contact", email: "dynamic@example.com" }
+          }
+        }
+      }
     end
 
     assert_redirected_to customer_url(Customer.last)
@@ -50,7 +80,19 @@ class CustomersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update customer" do
-    patch customer_url(@customer), params: { customer: { churn_risk: @customer.churn_risk, customer_success_manager_id: @customer.customer_success_manager_id, name: @customer.name, primary_contact_email: @customer.primary_contact_email, stage: @customer.stage } }
+    contact = @customer.customer_contacts.first
+
+    patch customer_url(@customer), params: {
+      customer: {
+        churn_risk: @customer.churn_risk,
+        customer_success_manager_id: @customer.customer_success_manager_id,
+        name: @customer.name,
+        stage: @customer.stage,
+        customer_contacts_attributes: {
+          "0" => { id: contact.id, name: contact.name, email: contact.email }
+        }
+      }
+    }
     assert_redirected_to customer_url(@customer)
   end
 

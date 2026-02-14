@@ -16,8 +16,8 @@
   </div>
 
   <div class="mb-3">
-    <%= form.label :primary_contact_email, class: "form-label" %>
-    <%= form.email_field :primary_contact_email, class: "form-control", required: true %>
+    <%= form.label :organization_id, class: "form-label" %>
+    <%= form.text_field :organization_id, class: "form-control", placeholder: "External org reference" %>
   </div>
 
   <div class="mb-3">
@@ -37,13 +37,77 @@
   </div>
 
   <div class="mb-3">
+    <%= form.label :customer_segment, class: "form-label" %>
+    <%= form.text_field :customer_segment_label, value: customer.customer_segment_label, class: "form-control", disabled: true %>
+    <div class="form-text">Computed automatically from stage and churn risk.</div>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :contract_start_date, class: "form-label" %>
+    <%= form.date_field :contract_start_date, class: "form-control" %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :contract_termination_date, class: "form-label" %>
+    <%= form.date_field :contract_termination_date, class: "form-control" %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :travel_budget, class: "form-label" %>
+    <%= form.number_field :travel_budget, class: "form-control", step: "0.01", min: 0 %>
+  </div>
+
+  <div class="mb-3">
     <%= form.label :customer_success_manager_id, "Customer success manager", class: "form-label" %>
     <%= form.collection_select :customer_success_manager_id,
-      CustomerSuccessManager.order(:first_name, :last_name),
+      CustomerSuccessManager.active.order(:first_name, :last_name),
       :id,
       :full_name,
       { prompt: "Choose a manager" },
       { class: "form-select", required: true } %>
+  </div>
+
+  <div class="mb-3" data-controller="nested-contacts">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <label class="form-label mb-0">Contact persons</label>
+      <button type="button" class="btn btn-sm btn-outline-primary" data-action="nested-contacts#add">Add contact</button>
+    </div>
+
+    <div class="vstack gap-2" data-nested-contacts-target="container">
+      <% contacts_for_form = customer.customer_contacts.to_a %>
+      <% contacts_for_form << customer.customer_contacts.build if contacts_for_form.empty? %>
+      <%= form.fields_for :customer_contacts, contacts_for_form do |contact_fields| %>
+        <div class="border rounded p-3" data-contact-row>
+          <%= contact_fields.hidden_field :_destroy %>
+          <div class="mb-2">
+            <%= contact_fields.label :name, class: "form-label" %>
+            <%= contact_fields.text_field :name, class: "form-control" %>
+          </div>
+          <div class="mb-2">
+            <%= contact_fields.label :email, class: "form-label" %>
+            <%= contact_fields.email_field :email, class: "form-control" %>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-danger" data-action="nested-contacts#remove">Remove</button>
+        </div>
+      <% end %>
+    </div>
+
+    <template data-nested-contacts-target="template">
+      <%= form.fields_for :customer_contacts, CustomerContact.new, child_index: "NEW_RECORD" do |contact_fields| %>
+        <div class="border rounded p-3" data-contact-row>
+          <%= contact_fields.hidden_field :_destroy %>
+          <div class="mb-2">
+            <%= contact_fields.label :name, class: "form-label" %>
+            <%= contact_fields.text_field :name, class: "form-control" %>
+          </div>
+          <div class="mb-2">
+            <%= contact_fields.label :email, class: "form-label" %>
+            <%= contact_fields.email_field :email, class: "form-control" %>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-danger" data-action="nested-contacts#remove">Remove</button>
+        </div>
+      <% end %>
+    </template>
   </div>
 
   <div class="d-flex gap-2">

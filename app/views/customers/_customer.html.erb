@@ -3,8 +3,11 @@
     <dt class="col-sm-4">Name</dt>
     <dd class="col-sm-8"><%= customer.name %></dd>
 
-    <dt class="col-sm-4">Primary contact email</dt>
-    <dd class="col-sm-8"><%= customer.primary_contact_email %></dd>
+    <dt class="col-sm-4">Organization ID</dt>
+    <dd class="col-sm-8"><%= customer.organization_id.presence || "-" %></dd>
+
+    <dt class="col-sm-4">Segment</dt>
+    <dd class="col-sm-8"><span class="badge text-bg-dark"><%= customer.customer_segment_label %></span></dd>
 
     <dt class="col-sm-4">Stage</dt>
     <dd class="col-sm-8"><span class="badge text-bg-secondary"><%= customer.stage.humanize %></span></dd>

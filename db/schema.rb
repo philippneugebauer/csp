@@ -10,7 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_14_175500) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_14_195502) do
+  create_table "customer_contacts", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "customer_id", null: false
+    t.string "email", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_id", "email"], name: "index_customer_contacts_on_customer_id_and_email"
+    t.index ["customer_id"], name: "index_customer_contacts_on_customer_id"
+  end
+
   create_table "customer_email_messages", force: :cascade do |t|
     t.text "body_text"
     t.datetime "created_at", null: false
@@ -47,26 +57,37 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_14_175500) do
 
   create_table "customer_success_managers", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.datetime "deleted_at"
     t.string "email"
     t.string "first_name"
     t.string "last_name"
     t.string "password_digest"
     t.datetime "updated_at", null: false
+    t.index ["deleted_at"], name: "index_customer_success_managers_on_deleted_at"
     t.index ["email"], name: "index_customer_success_managers_on_email"
   end
 
   create_table "customers", force: :cascade do |t|
     t.integer "churn_risk", default: 0, null: false
+    t.json "contact_persons", default: [], null: false
+    t.date "contract_start_date"
+    t.date "contract_termination_date"
     t.datetime "created_at", null: false
+    t.integer "customer_segment", default: 3, null: false
     t.integer "customer_success_manager_id", null: false
     t.string "name", null: false
-    t.string "primary_contact_email", null: false
+    t.string "organization_id"
+    t.string "primary_contact_email"
     t.integer "stage", default: 0, null: false
+    t.decimal "travel_budget", precision: 12, scale: 2
     t.datetime "updated_at", null: false
+    t.index ["customer_segment"], name: "index_customers_on_customer_segment"
     t.index ["customer_success_manager_id"], name: "index_customers_on_customer_success_manager_id"
+    t.index ["organization_id"], name: "index_customers_on_organization_id"
     t.index ["primary_contact_email"], name: "index_customers_on_primary_contact_email"
   end
 
+  add_foreign_key "customer_contacts", "customers"
   add_foreign_key "customer_email_messages", "customer_success_managers"
   add_foreign_key "customer_email_messages", "customers"
   add_foreign_key "customer_notes", "customer_success_managers"

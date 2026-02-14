@@ -6,7 +6,7 @@ class SessionsController < ApplicationController
   end
 
   def create
-    customer_success_manager = CustomerSuccessManager.find_by(email: params[:email].to_s.downcase.strip)
+    customer_success_manager = CustomerSuccessManager.active.find_by(email: params[:email].to_s.downcase.strip)
 
     if customer_success_manager&.authenticate(params[:password])
       session[:customer_success_manager_id] = customer_success_manager.id

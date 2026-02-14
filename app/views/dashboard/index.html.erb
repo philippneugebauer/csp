@@ -101,7 +101,7 @@
                   <tr>
                     <td>
                       <div class="fw-semibold"><%= customer.name %></div>
-                      <div class="small text-body-secondary"><%= customer.primary_contact_email %></div>
+                      <div class="small text-body-secondary"><%= customer.customer_contacts.first&.email || "No contact email" %></div>
                     </td>
                     <td><%= customer.customer_success_manager.full_name %></td>
                     <td class="text-end"><%= link_to "Open", customer_path(customer), class: "btn btn-sm btn-outline-primary" %></td>

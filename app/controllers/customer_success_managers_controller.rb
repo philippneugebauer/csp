@@ -3,7 +3,7 @@ class CustomerSuccessManagersController < ApplicationController
 
   # GET /customer_success_managers or /customer_success_managers.json
   def index
-    @customer_success_managers = CustomerSuccessManager.order(:first_name, :last_name)
+    @customer_success_managers = CustomerSuccessManager.active.order(:first_name, :last_name)
   end
 
   # GET /customer_success_managers/1 or /customer_success_managers/1.json
@@ -54,10 +54,10 @@ class CustomerSuccessManagersController < ApplicationController
       return
     end
 
-    @customer_success_manager.destroy!
+    @customer_success_manager.soft_delete!
 
     respond_to do |format|
-      format.html { redirect_to customer_success_managers_path, notice: "Customer success manager was successfully destroyed.", status: :see_other }
+      format.html { redirect_to customer_success_managers_path, notice: "Customer success manager was successfully archived.", status: :see_other }
       format.json { head :no_content }
     end
   end

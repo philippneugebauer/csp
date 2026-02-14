@@ -1,0 +1,9 @@
+one:
+  customer: one
+  name: Jane Acme
+  email: jane@acme.example
+
+two:
+  customer: two
+  name: John Globex
+  email: john@globex.example

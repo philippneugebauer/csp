@@ -22,6 +22,15 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
+  test "should reject deleted manager credentials" do
+    manager = customer_success_managers(:one)
+    manager.update!(deleted_at: Time.current)
+
+    post session_url, params: { email: manager.email, password: "password" }
+
+    assert_response :unprocessable_entity
+  end
+
   test "should logout" do
     sign_in_as(customer_success_managers(:one))
 

@@ -15,7 +15,7 @@ class ApplicationController < ActionController::Base
     end
 
     def current_customer_success_manager
-      @current_customer_success_manager ||= CustomerSuccessManager.find_by(id: session[:customer_success_manager_id])
+      @current_customer_success_manager ||= CustomerSuccessManager.active.find_by(id: session[:customer_success_manager_id])
     end
 
     def require_authentication

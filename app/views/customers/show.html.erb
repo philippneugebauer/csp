@@ -4,7 +4,6 @@
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <div>
       <h1 class="h2 mb-0"><%= @customer.name %></h1>
-      <div class="text-body-secondary"><%= @customer.primary_contact_email %></div>
     </div>
     <div class="d-flex flex-wrap gap-2">
       <%= link_to customers_path, class: "btn btn-outline-primary" do %>
@@ -25,20 +24,56 @@
   <div class="card shadow-sm mb-4">
     <div class="card-body">
       <div class="row g-3">
-        <div class="col-md-3">
+        <div class="col-md-2">
+          <div class="text-body-secondary small">Organization ID</div>
+          <div class="fw-semibold"><%= @customer.organization_id.presence || "-" %></div>
+        </div>
+        <div class="col-md-2">
+          <div class="text-body-secondary small">Segment</div>
+          <div class="fw-semibold"><span class="badge text-bg-dark"><%= @customer.customer_segment_label %></span></div>
+        </div>
+        <div class="col-md-2">
           <div class="text-body-secondary small">Stage</div>
           <div class="fw-semibold"><span class="badge text-bg-secondary"><%= @customer.stage.humanize %></span></div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
           <div class="text-body-secondary small">Churn risk</div>
           <% risk_badge_class = @customer.high? ? "text-bg-danger" : @customer.medium? ? "text-bg-warning" : "text-bg-success" %>
           <div class="fw-semibold"><span class="badge <%= risk_badge_class %>"><%= @customer.churn_risk.humanize %></span></div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-2">
+          <div class="text-body-secondary small">Travel budget</div>
+          <div class="fw-semibold"><%= @customer.travel_budget.present? ? number_to_currency(@customer.travel_budget) : "-" %></div>
+        </div>
+        <div class="col-md-2">
           <div class="text-body-secondary small">Customer Success Manager</div>
           <div class="fw-semibold">
             <%= link_to @customer.customer_success_manager.full_name, customer_success_manager_path(@customer.customer_success_manager), class: "link-primary text-decoration-none" %>
           </div>
+        </div>
+        <div class="col-md-6">
+          <div class="text-body-secondary small">Contract period</div>
+          <div class="fw-semibold">
+            <% if @customer.contract_start_date.present? || @customer.contract_termination_date.present? %>
+              <%= @customer.contract_start_date.present? ? l(@customer.contract_start_date) : "?" %>
+              -
+              <%= @customer.contract_termination_date.present? ? l(@customer.contract_termination_date) : "?" %>
+            <% else %>
+              -
+            <% end %>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="text-body-secondary small">Contact persons</div>
+          <% if @customer.customer_contacts.any? %>
+            <div class="fw-semibold">
+              <% @customer.customer_contacts.each do |person| %>
+                <div><%= person.name %> (<%= person.email %>)</div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="fw-semibold">-</div>
+          <% end %>
         </div>
       </div>
     </div>
