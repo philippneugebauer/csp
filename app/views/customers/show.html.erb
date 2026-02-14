@@ -17,6 +17,14 @@
       >
         <i class="bi bi-file-earmark-arrow-up me-1"></i>Upload document
       </button>
+      <button
+        class="btn btn-outline-primary"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#addGmvModal"
+      >
+        <i class="bi bi-graph-up-arrow me-1"></i>Add GMV
+      </button>
       <%= button_to sync_emails_customer_path(@customer), method: :post, class: "btn btn-outline-secondary" do %>
         <i class="bi bi-envelope-arrow-down me-1"></i>Sync Gmail
       <% end %>
@@ -172,6 +180,7 @@
         <%= link_to "All", customer_path(@customer, activity_type: "all", email_direction: @email_direction), class: "btn #{@activity_type == "all" ? "btn-primary" : "btn-outline-primary"}" %>
         <%= link_to "Notes", customer_path(@customer, activity_type: "notes"), class: "btn #{@activity_type == "notes" ? "btn-primary" : "btn-outline-primary"}" %>
         <%= link_to "Documents", customer_path(@customer, activity_type: "documents"), class: "btn #{@activity_type == "documents" ? "btn-primary" : "btn-outline-primary"}" %>
+        <%= link_to "GMV", customer_path(@customer, activity_type: "gmv"), class: "btn #{@activity_type == "gmv" ? "btn-primary" : "btn-outline-primary"}" %>
         <%= link_to "Emails", customer_path(@customer, activity_type: "emails", email_direction: "all"), class: "btn #{@activity_type == "emails" && @email_direction == "all" ? "btn-primary" : "btn-outline-primary"}" %>
         <%= link_to "Inbound", customer_path(@customer, activity_type: "emails", email_direction: "inbound"), class: "btn #{@activity_type == "emails" && @email_direction == "inbound" ? "btn-primary" : "btn-outline-primary"}" %>
         <%= link_to "Outbound", customer_path(@customer, activity_type: "emails", email_direction: "outbound"), class: "btn #{@activity_type == "emails" && @email_direction == "outbound" ? "btn-primary" : "btn-outline-primary"}" %>
@@ -225,6 +234,20 @@
                     <% end %>
                   </div>
                 <% end %>
+              </div>
+              <div class="small text-body-secondary text-nowrap"><%= l(activity.occurred_at, format: :short) %></div>
+            </div>
+          </div>
+        <% elsif activity.is_a?(GmvActivity) %>
+          <div class="list-group-item">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+              <div class="w-100">
+                <div class="d-flex flex-wrap gap-2 mb-1">
+                  <span class="badge text-bg-success">GMV</span>
+                </div>
+                <div class="fw-semibold"><%= number_to_currency(activity.gmv_revenue) %></div>
+                <div class="small text-body-secondary">Revenue date: <%= l(activity.gmv_on) %></div>
+                <div class="small text-body-secondary"><%= activity.customer_success_manager.full_name %></div>
               </div>
               <div class="small text-body-secondary text-nowrap"><%= l(activity.occurred_at, format: :short) %></div>
             </div>
@@ -302,6 +325,43 @@
           <div class="mt-3 d-flex justify-content-end gap-2">
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
             <%= form.submit "Add task", class: "btn btn-primary" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="addGmvModal" tabindex="-1" aria-labelledby="addGmvModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="addGmvModalLabel">Add GMV activity</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <%= form_with(
+          url: customer_customer_gmv_activities_path(@customer),
+          scope: :customer_gmv_activity,
+          data: {
+            turbo_temporary: true,
+            controller: "transient-form",
+            action: "turbo:submit-end->transient-form#resetOnSuccess turbo:before-cache@document->transient-form#reset"
+          }
+        ) do |form| %>
+          <div class="row g-3">
+            <div class="col-12">
+              <%= form.label :gmv_on, "Revenue date", class: "form-label" %>
+              <%= form.date_field :gmv_on, required: true, class: "form-control", value: Date.current, data: { turbo_temporary: true } %>
+            </div>
+            <div class="col-12">
+              <%= form.label :gmv_revenue, "GMV revenue", class: "form-label" %>
+              <%= form.number_field :gmv_revenue, required: true, min: 0, step: "0.01", class: "form-control", placeholder: "0.00", data: { turbo_temporary: true } %>
+            </div>
+          </div>
+          <div class="mt-3 d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <%= form.submit "Add GMV", class: "btn btn-primary" %>
           </div>
         <% end %>
       </div>

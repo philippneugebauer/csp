@@ -32,7 +32,7 @@ class CustomersController < ApplicationController
 
   # GET /customers/1 or /customers/1.json
   def show
-    @activity_type = params[:activity_type].presence_in(%w[all notes documents emails]) || "all"
+    @activity_type = params[:activity_type].presence_in(%w[all notes documents emails gmv]) || "all"
     @email_direction = params[:email_direction].presence_in(%w[all inbound outbound]) || "all"
     @show_completed_tasks = ActiveModel::Type::Boolean.new.cast(params[:show_completed_tasks])
 
@@ -54,6 +54,8 @@ class CustomersController < ApplicationController
       @activities = @activities.where(type: "NoteActivity").where.missing(:documents_attachments)
     elsif @activity_type == "documents"
       @activities = @activities.where(type: "NoteActivity").where.associated(:documents_attachments).distinct
+    elsif @activity_type == "gmv"
+      @activities = @activities.where(type: "GmvActivity")
     end
 
     if @activity_type == "emails"

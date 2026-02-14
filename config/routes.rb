@@ -7,6 +7,7 @@ Rails.application.routes.draw do
     get :history, on: :member
     resources :customer_notes, only: :create
     resources :customer_documents, only: :create
+    resources :customer_gmv_activities, only: :create
     resources :customer_tasks, only: :create do
       patch :complete, on: :member
     end

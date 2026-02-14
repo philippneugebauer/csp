@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_14_223000) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_14_233000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -50,6 +50,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_14_223000) do
     t.string "from_email"
     t.string "gmail_message_id"
     t.string "gmail_thread_id"
+    t.date "gmv_on"
+    t.decimal "gmv_revenue", precision: 12, scale: 2
     t.json "metadata", default: {}
     t.datetime "occurred_at", null: false
     t.text "snippet"
@@ -62,6 +64,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_14_223000) do
     t.index ["customer_success_manager_id"], name: "index_activities_on_customer_success_manager_id"
     t.index ["gmail_message_id"], name: "index_activities_on_gmail_message_id", unique: true
     t.index ["gmail_thread_id"], name: "index_activities_on_gmail_thread_id"
+    t.index ["gmv_on"], name: "index_activities_on_gmv_on"
     t.index ["occurred_at"], name: "index_activities_on_occurred_at"
     t.index ["type"], name: "index_activities_on_type"
   end
