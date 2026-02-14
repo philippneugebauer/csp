@@ -104,7 +104,9 @@
           <div class="fw-semibold">
             <% if monthly_percentage.present? && monthly_target.present? %>
               <span
-                title="<%= number_to_currency(@customer.monthly_gmv_total) %> / <%= number_to_currency(monthly_target) %>"
+                class="badge text-bg-primary rounded-pill"
+                data-bs-toggle="tooltip"
+                data-bs-title="<%= number_to_currency(@customer.monthly_gmv_total) %> / <%= number_to_currency(monthly_target) %>"
               >
                 <%= number_to_percentage(monthly_percentage, precision: 1) %>
               </span>
@@ -120,7 +122,9 @@
           <div class="fw-semibold">
             <% if quarterly_percentage.present? && quarterly_target.present? %>
               <span
-                title="<%= number_to_currency(@customer.quarterly_gmv_total) %> / <%= number_to_currency(quarterly_target) %>"
+                class="badge text-bg-success rounded-pill"
+                data-bs-toggle="tooltip"
+                data-bs-title="<%= number_to_currency(@customer.quarterly_gmv_total) %> / <%= number_to_currency(quarterly_target) %>"
               >
                 <%= number_to_percentage(quarterly_percentage, precision: 1) %>
               </span>
