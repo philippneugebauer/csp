@@ -3,8 +3,11 @@ class CustomerNotesController < ApplicationController
 
   # POST /customers/:customer_id/customer_notes
   def create
-    @customer_note = @customer.customer_notes.new(
-      customer_note_params.merge(customer_success_manager: current_customer_success_manager)
+    @customer_note = NoteActivity.new(
+      customer: @customer,
+      customer_success_manager: current_customer_success_manager,
+      body: customer_note_params[:body],
+      occurred_at: customer_note_params[:noted_at]
     )
 
     if @customer_note.save

@@ -14,7 +14,7 @@ module Gmail
 
     def sync!
       raise "GMAIL_ACCESS_TOKEN is missing" if @access_token.blank?
-      raise "Customer contact email is missing" if @customer@customer.sync_contact_email.blank?
+      raise "Customer contact email is missing" if @customer.sync_contact_email.blank?
 
       list = gmail_get("/messages", q: search_query, maxResults: 25)
       message_refs = list.fetch("messages", [])
@@ -29,9 +29,10 @@ module Gmail
         payload = gmail_get("/messages/#{gmail_message_id}", format: "full")
         headers = headers_hash(payload)
 
-        record = CustomerEmailMessage.find_or_initialize_by(gmail_message_id: gmail_message_id)
+        record = EmailActivity.find_or_initialize_by(gmail_message_id: gmail_message_id)
         record.customer = @customer
         record.customer_success_manager = @customer.customer_success_manager
+        record.occurred_at = parse_datetime(headers["date"])
         record.gmail_thread_id = payload["threadId"]
         record.direction = message_direction(headers["from"])
         record.subject = headers["subject"]
@@ -39,7 +40,6 @@ module Gmail
         record.to_email = headers["to"]
         record.snippet = payload["snippet"]
         record.body_text = body_text(payload["payload"])
-        record.sent_at = parse_datetime(headers["date"])
         record.metadata = {
           label_ids: payload["labelIds"],
           history_id: payload["historyId"],
@@ -63,7 +63,7 @@ module Gmail
       end
 
       def search_query
-        customer_email = .sync_contact_email
+        customer_email = @customer.sync_contact_email
         "(from:#{customer_email} OR to:#{customer_email}) newer_than:365d"
       end
 

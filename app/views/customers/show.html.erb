@@ -82,7 +82,7 @@
   <div class="card shadow-sm mb-3">
     <div class="card-header bg-body-tertiary fw-semibold">Add CSM note</div>
     <div class="card-body">
-      <%= form_with(model: [@customer, @customer_note], data: { turbo_temporary: true }) do |form| %>
+      <%= form_with(url: customer_customer_notes_path(@customer), scope: :customer_note, data: { turbo_temporary: true }) do |form| %>
         <div class="row g-3">
           <div class="col-12">
             <%= form.text_area :body, class: "form-control", rows: 3, required: true, placeholder: "Add a note...", autocomplete: "off", data: { turbo_temporary: true } %>
@@ -108,46 +108,42 @@
     </div>
 
     <div class="list-group list-group-flush">
-      <% if @activity_type == "notes" || @activity_type == "all" %>
-        <% @customer_notes.each do |note| %>
+      <% @activities.each do |activity| %>
+        <% if activity.is_a?(NoteActivity) %>
           <div class="list-group-item">
             <div class="d-flex justify-content-between align-items-start gap-3">
               <div>
                 <div class="mb-1"><span class="badge text-bg-secondary">Note</span></div>
-                <div><%= simple_format(note.body) %></div>
-                <div class="small text-body-secondary"><%= note.customer_success_manager.full_name %></div>
+                <div><%= simple_format(activity.body) %></div>
+                <div class="small text-body-secondary"><%= activity.customer_success_manager.full_name %></div>
               </div>
-              <div class="small text-body-secondary text-nowrap"><%= l(note.noted_at, format: :short) %></div>
+              <div class="small text-body-secondary text-nowrap"><%= l(activity.occurred_at, format: :short) %></div>
             </div>
           </div>
-        <% end %>
-      <% end %>
-
-      <% if @activity_type == "emails" || @activity_type == "all" %>
-        <% @customer_email_messages.each do |message| %>
+        <% elsif activity.is_a?(EmailActivity) %>
           <div class="list-group-item">
             <div class="d-flex justify-content-between align-items-start gap-3">
               <div class="w-100">
                 <div class="d-flex flex-wrap gap-2 mb-1">
                   <span class="badge text-bg-info">Email</span>
-                  <% direction_class = message.inbound? ? "text-bg-info" : "text-bg-primary" %>
-                  <span class="badge <%= direction_class %>"><%= message.direction.humanize %></span>
+                  <% direction_class = activity.inbound? ? "text-bg-info" : "text-bg-primary" %>
+                  <span class="badge <%= direction_class %>"><%= activity.direction.humanize %></span>
                 </div>
-                <div class="fw-semibold"><%= message.subject.presence || "(no subject)" %></div>
-                <% if message.snippet.present? %>
-                  <div class="small text-body-secondary mb-1"><%= message.snippet %></div>
+                <div class="fw-semibold"><%= activity.subject.presence || "(no subject)" %></div>
+                <% if activity.snippet.present? %>
+                  <div class="small text-body-secondary mb-1"><%= activity.snippet %></div>
                 <% end %>
                 <div class="small text-body-secondary">
-                  <strong>From:</strong> <%= message.from_email %> · <strong>To:</strong> <%= message.to_email %>
+                  <strong>From:</strong> <%= activity.from_email %> · <strong>To:</strong> <%= activity.to_email %>
                 </div>
               </div>
-              <div class="small text-body-secondary text-nowrap"><%= l(message.sent_at || message.created_at, format: :short) %></div>
+              <div class="small text-body-secondary text-nowrap"><%= l(activity.occurred_at, format: :short) %></div>
             </div>
           </div>
         <% end %>
       <% end %>
 
-      <% if (@activity_type == "notes" && @customer_notes.empty?) || (@activity_type == "emails" && @customer_email_messages.empty?) || (@activity_type == "all" && @customer_notes.empty? && @customer_email_messages.empty?) %>
+      <% if @activities.empty? %>
         <div class="list-group-item text-body-secondary">No activity found for this filter.</div>
       <% end %>
     </div>

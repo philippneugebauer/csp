@@ -13,9 +13,9 @@ class DashboardController < ApplicationController
       .order(updated_at: :desc)
       .limit(8)
 
-    @recent_notes = CustomerNote
+    @recent_notes = NoteActivity
       .includes(:customer, :customer_success_manager)
-      .order(noted_at: :desc)
+      .order(occurred_at: :desc)
       .limit(8)
   end
 end

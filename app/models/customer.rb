@@ -1,7 +1,8 @@
 class Customer < ApplicationRecord
   belongs_to :customer_success_manager
-  has_many :customer_notes, dependent: :destroy
-  has_many :customer_email_messages, dependent: :destroy
+  has_many :activities, dependent: :destroy
+  has_many :note_activities, -> { where(type: "NoteActivity") }, class_name: "Activity", dependent: :destroy
+  has_many :email_activities, -> { where(type: "EmailActivity") }, class_name: "Activity", dependent: :destroy
   has_many :customer_contacts, dependent: :destroy
 
   accepts_nested_attributes_for :customer_contacts, allow_destroy: true, reject_if: :all_blank

@@ -1,7 +1,8 @@
 class CustomerSuccessManager < ApplicationRecord
   has_many :customers, dependent: :destroy
-  has_many :customer_notes, dependent: :destroy
-  has_many :customer_email_messages, dependent: :destroy
+  has_many :activities, dependent: :destroy
+  has_many :note_activities, -> { where(type: "NoteActivity") }, class_name: "Activity", dependent: :destroy
+  has_many :email_activities, -> { where(type: "EmailActivity") }, class_name: "Activity", dependent: :destroy
 
   has_secure_password
 

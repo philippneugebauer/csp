@@ -35,16 +35,17 @@ class CustomersController < ApplicationController
     @activity_type = params[:activity_type].presence_in(%w[all notes emails]) || "all"
     @email_direction = params[:email_direction].presence_in(%w[all inbound outbound]) || "all"
 
-    @customer_note = @customer.customer_notes.new(
+    @customer_note = NoteActivity.new(
+      customer: @customer,
       customer_success_manager: current_customer_success_manager,
-      noted_at: Time.current
+      occurred_at: Time.current
     )
 
-    @customer_notes = @customer.customer_notes.includes(:customer_success_manager).order(noted_at: :desc)
-
-    @customer_email_messages = @customer.customer_email_messages.order(sent_at: :desc, created_at: :desc)
-    if @email_direction != "all"
-      @customer_email_messages = @customer_email_messages.public_send(@email_direction)
+    @activities = @customer.activities.includes(:customer_success_manager).recent_first
+    @activities = @activities.where(type: "NoteActivity") if @activity_type == "notes"
+    if @activity_type == "emails"
+      @activities = @activities.where(type: "EmailActivity")
+      @activities = @activities.public_send(@email_direction) if @email_direction != "all"
     end
   end
 

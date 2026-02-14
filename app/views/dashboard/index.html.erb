@@ -42,7 +42,7 @@
       <div class="card shadow-sm h-100">
         <div class="card-body">
           <div class="text-body-secondary small">Total CSM notes</div>
-          <div class="display-6 fw-semibold"><%= CustomerNote.count %></div>
+          <div class="display-6 fw-semibold"><%= NoteActivity.count %></div>
         </div>
       </div>
     </div>
@@ -123,7 +123,7 @@
           <% @recent_notes.each do |note| %>
             <li class="list-group-item">
               <div class="small text-body-secondary mb-1">
-                <%= note.customer.name %> · <%= note.customer_success_manager.full_name %> · <%= l(note.noted_at, format: :short) %>
+                <%= note.customer.name %> · <%= note.customer_success_manager.full_name %> · <%= l(note.occurred_at, format: :short) %>
               </div>
               <div><%= truncate(note.body, length: 140) %></div>
             </li>
