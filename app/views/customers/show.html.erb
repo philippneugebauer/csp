@@ -1,132 +1,119 @@
 <% content_for :title, @customer.name %>
 
 <div class="container py-4">
-  <% if notice.present? %>
-    <div class="alert alert-success" role="alert"><%= notice %></div>
-  <% end %>
-  <% if alert.present? %>
-    <div class="alert alert-danger" role="alert"><%= alert %></div>
-  <% end %>
-
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <h1 class="h2 mb-0"><%= @customer.name %></h1>
+    <div>
+      <h1 class="h2 mb-0"><%= @customer.name %></h1>
+      <div class="text-body-secondary"><%= @customer.primary_contact_email %></div>
+    </div>
     <div class="d-flex flex-wrap gap-2">
       <%= link_to customers_path, class: "btn btn-outline-primary" do %>
-        <i class="bi bi-arrow-left me-1"></i>Back to customers
-      <% end %>
-      <%= link_to edit_customer_path(@customer), class: "btn btn-warning" do %>
-        <i class="bi bi-pencil-square me-1"></i>Edit
+        <i class="bi bi-arrow-left me-1"></i>Back
       <% end %>
       <%= button_to sync_emails_customer_path(@customer), method: :post, class: "btn btn-outline-secondary" do %>
         <i class="bi bi-envelope-arrow-down me-1"></i>Sync Gmail
       <% end %>
-      <%= button_to @customer, method: :delete, class: "btn btn-danger", form: { class: "d-inline" } do %>
+      <%= link_to edit_customer_path(@customer), class: "btn btn-warning" do %>
+        <i class="bi bi-pencil-square me-1"></i>Edit
+      <% end %>
+      <%= button_to @customer, method: :delete, class: "btn btn-outline-danger", form: { class: "d-inline" } do %>
         <i class="bi bi-trash me-1"></i>Delete
       <% end %>
     </div>
   </div>
 
-  <div class="row g-3">
-    <div class="col-lg-5">
-      <div class="card shadow-sm h-100">
-        <div class="card-header bg-body-tertiary fw-semibold">Account snapshot</div>
-        <div class="card-body">
-          <%= render @customer %>
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <div class="text-body-secondary small">Stage</div>
+          <div class="fw-semibold"><span class="badge text-bg-secondary"><%= @customer.stage.humanize %></span></div>
+        </div>
+        <div class="col-md-3">
+          <div class="text-body-secondary small">Churn risk</div>
+          <% risk_badge_class = @customer.high? ? "text-bg-danger" : @customer.medium? ? "text-bg-warning" : "text-bg-success" %>
+          <div class="fw-semibold"><span class="badge <%= risk_badge_class %>"><%= @customer.churn_risk.humanize %></span></div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-body-secondary small">Customer Success Manager</div>
+          <div class="fw-semibold"><%= @customer.customer_success_manager.full_name %></div>
+          <div class="small text-body-secondary"><%= @customer.customer_success_manager.email %></div>
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="col-lg-7">
-      <div class="card shadow-sm mb-3">
-        <div class="card-header bg-body-tertiary fw-semibold">Add CSM note</div>
-        <div class="card-body">
-          <%= form_with(model: [@customer, @customer_note]) do |form| %>
-            <div class="mb-3">
-              <%= form.label :customer_success_manager_id, "Author", class: "form-label" %>
-              <%= form.collection_select :customer_success_manager_id,
-                CustomerSuccessManager.order(:first_name, :last_name),
-                :id,
-                :full_name,
-                {},
-                { class: "form-select", required: true } %>
-            </div>
-
-            <div class="mb-3">
-              <%= form.label :body, class: "form-label" %>
-              <%= form.text_area :body, class: "form-control", rows: 4, required: true %>
-            </div>
-
-            <%= form.submit "Add note", class: "btn btn-primary" %>
-          <% end %>
-        </div>
-      </div>
-
-      <div class="card shadow-sm">
-        <div class="card-header bg-body-tertiary fw-semibold">CSM notes (<%= @customer_notes.size %>)</div>
-        <ul class="list-group list-group-flush">
-          <% @customer_notes.each do |note| %>
-            <li class="list-group-item">
-              <div class="d-flex justify-content-between align-items-start gap-3">
-                <div>
-                  <div><%= simple_format(note.body) %></div>
-                  <div class="small text-body-secondary">
-                    <%= note.customer_success_manager.full_name %>
-                  </div>
-                </div>
-                <div class="small text-body-secondary text-nowrap"><%= l(note.noted_at, format: :short) %></div>
-              </div>
-            </li>
-          <% end %>
-          <% if @customer_notes.empty? %>
-            <li class="list-group-item text-body-secondary">No notes yet.</li>
-          <% end %>
-        </ul>
-      </div>
-    </div>
-
-    <div class="col-12">
-      <div class="card shadow-sm overflow-hidden">
-        <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Email conversation (<%= @customer_email_messages.size %>)</span>
-          <small class="text-body-secondary">Pulled from Gmail</small>
-        </div>
-        <% if @customer_email_messages.any? %>
-          <div class="table-responsive">
-            <table class="table table-sm align-middle mb-0">
-              <thead class="table-light">
-                <tr>
-                  <th>When</th>
-                  <th>Direction</th>
-                  <th>Subject</th>
-                  <th>From</th>
-                  <th>To</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% @customer_email_messages.each do |message| %>
-                  <tr>
-                    <td class="text-nowrap"><%= l(message.sent_at || message.created_at, format: :short) %></td>
-                    <td>
-                      <% direction_class = message.inbound? ? "text-bg-info" : "text-bg-primary" %>
-                      <span class="badge <%= direction_class %>"><%= message.direction.humanize %></span>
-                    </td>
-                    <td>
-                      <div class="fw-semibold"><%= message.subject.presence || "(no subject)" %></div>
-                      <% if message.snippet.present? %>
-                        <div class="small text-body-secondary"><%= message.snippet %></div>
-                      <% end %>
-                    </td>
-                    <td><%= message.from_email %></td>
-                    <td><%= message.to_email %></td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
+  <div class="card shadow-sm mb-3">
+    <div class="card-header bg-body-tertiary fw-semibold">Add CSM note</div>
+    <div class="card-body">
+      <%= form_with(model: [@customer, @customer_note]) do |form| %>
+        <div class="row g-3">
+          <div class="col-12">
+            <%= form.text_area :body, class: "form-control", rows: 3, required: true, placeholder: "Add a note..." %>
           </div>
-        <% else %>
-          <div class="card-body text-body-secondary">No emails synced yet. Click "Sync Gmail" to fetch the latest messages.</div>
-        <% end %>
+        </div>
+        <div class="mt-3">
+          <%= form.submit "Add note", class: "btn btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card shadow-sm overflow-hidden">
+    <div class="card-header bg-body-tertiary d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <span class="fw-semibold">Customer activity</span>
+      <div class="btn-group btn-group-sm" role="group" aria-label="Activity type filter">
+        <%= link_to "All", customer_path(@customer, activity_type: "all", email_direction: @email_direction), class: "btn #{@activity_type == "all" ? "btn-primary" : "btn-outline-primary"}" %>
+        <%= link_to "Notes", customer_path(@customer, activity_type: "notes"), class: "btn #{@activity_type == "notes" ? "btn-primary" : "btn-outline-primary"}" %>
+        <%= link_to "Emails", customer_path(@customer, activity_type: "emails", email_direction: "all"), class: "btn #{@activity_type == "emails" && @email_direction == "all" ? "btn-primary" : "btn-outline-primary"}" %>
+        <%= link_to "Inbound", customer_path(@customer, activity_type: "emails", email_direction: "inbound"), class: "btn #{@activity_type == "emails" && @email_direction == "inbound" ? "btn-primary" : "btn-outline-primary"}" %>
+        <%= link_to "Outbound", customer_path(@customer, activity_type: "emails", email_direction: "outbound"), class: "btn #{@activity_type == "emails" && @email_direction == "outbound" ? "btn-primary" : "btn-outline-primary"}" %>
       </div>
+    </div>
+
+    <div class="list-group list-group-flush">
+      <% if @activity_type == "notes" || @activity_type == "all" %>
+        <% @customer_notes.each do |note| %>
+          <div class="list-group-item">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+              <div>
+                <div class="mb-1"><span class="badge text-bg-secondary">Note</span></div>
+                <div><%= simple_format(note.body) %></div>
+                <div class="small text-body-secondary"><%= note.customer_success_manager.full_name %></div>
+              </div>
+              <div class="small text-body-secondary text-nowrap"><%= l(note.noted_at, format: :short) %></div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+
+      <% if @activity_type == "emails" || @activity_type == "all" %>
+        <% @customer_email_messages.each do |message| %>
+          <div class="list-group-item">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+              <div class="w-100">
+                <div class="d-flex flex-wrap gap-2 mb-1">
+                  <span class="badge text-bg-info">Email</span>
+                  <% direction_class = message.inbound? ? "text-bg-info" : "text-bg-primary" %>
+                  <span class="badge <%= direction_class %>"><%= message.direction.humanize %></span>
+                </div>
+                <div class="fw-semibold"><%= message.subject.presence || "(no subject)" %></div>
+                <% if message.snippet.present? %>
+                  <div class="small text-body-secondary mb-1"><%= message.snippet %></div>
+                <% end %>
+                <div class="small text-body-secondary">
+                  <strong>From:</strong> <%= message.from_email %> · <strong>To:</strong> <%= message.to_email %>
+                </div>
+              </div>
+              <div class="small text-body-secondary text-nowrap"><%= l(message.sent_at || message.created_at, format: :short) %></div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+
+      <% if (@activity_type == "notes" && @customer_notes.empty?) || (@activity_type == "emails" && @customer_email_messages.empty?) || (@activity_type == "all" && @customer_notes.empty? && @customer_email_messages.empty?) %>
+        <div class="list-group-item text-body-secondary">No activity found for this filter.</div>
+      <% end %>
     </div>
   </div>
 </div>
