@@ -3,7 +3,9 @@ class CustomerNotesController < ApplicationController
 
   # POST /customers/:customer_id/customer_notes
   def create
-    @customer_note = @customer.customer_notes.new(customer_note_params)
+    @customer_note = @customer.customer_notes.new(
+      customer_note_params.merge(customer_success_manager: current_customer_success_manager)
+    )
 
     if @customer_note.save
       redirect_to @customer, notice: "Customer note was successfully added."
@@ -18,6 +20,6 @@ class CustomerNotesController < ApplicationController
     end
 
     def customer_note_params
-      params.expect(customer_note: [ :customer_success_manager_id, :body, :noted_at ])
+      params.expect(customer_note: [ :body, :noted_at ])
     end
 end
