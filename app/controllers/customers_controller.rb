@@ -8,12 +8,20 @@ class CustomersController < ApplicationController
 
   # GET /customers/1 or /customers/1.json
   def show
+    @activity_type = params[:activity_type].presence_in(%w[all notes emails]) || "all"
+    @email_direction = params[:email_direction].presence_in(%w[all inbound outbound]) || "all"
+
     @customer_note = @customer.customer_notes.new(
-      customer_success_manager: @customer.customer_success_manager,
+      customer_success_manager: current_customer_success_manager,
       noted_at: Time.current
     )
+
     @customer_notes = @customer.customer_notes.includes(:customer_success_manager).order(noted_at: :desc)
+
     @customer_email_messages = @customer.customer_email_messages.order(sent_at: :desc, created_at: :desc)
+    if @email_direction != "all"
+      @customer_email_messages = @customer_email_messages.public_send(@email_direction)
+    end
   end
 
   # GET /customers/new
