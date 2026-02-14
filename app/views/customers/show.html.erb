@@ -50,6 +50,18 @@
           <div class="text-body-secondary small">Organization ID</div>
           <div class="fw-semibold"><%= @customer.organization_id.presence || "-" %></div>
         </div>
+        <div class="col-md-3">
+          <div class="text-body-secondary small">Contact persons</div>
+          <% if @customer.customer_contacts.any? %>
+            <div class="fw-semibold">
+              <% @customer.customer_contacts.each do |person| %>
+                <div><%= person.name %> (<%= person.email %>)</div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="fw-semibold">-</div>
+          <% end %>
+        </div>
         <div class="col-md-2">
           <div class="text-body-secondary small">Segment</div>
           <div class="fw-semibold"><span class="badge text-bg-dark"><%= @customer.customer_segment_label %></span></div>
@@ -62,10 +74,6 @@
           <div class="text-body-secondary small">Churn risk</div>
           <% risk_badge_class = @customer.high? ? "text-bg-danger" : @customer.medium? ? "text-bg-warning" : "text-bg-success" %>
           <div class="fw-semibold"><span class="badge <%= risk_badge_class %>"><%= @customer.churn_risk.humanize %></span></div>
-        </div>
-        <div class="col-md-2">
-          <div class="text-body-secondary small">Travel budget</div>
-          <div class="fw-semibold"><%= @customer.travel_budget.present? ? number_to_currency(@customer.travel_budget) : "-" %></div>
         </div>
         <div class="col-md-2">
           <div class="text-body-secondary small">Customer Success Manager</div>
@@ -85,17 +93,9 @@
             <% end %>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="text-body-secondary small">Contact persons</div>
-          <% if @customer.customer_contacts.any? %>
-            <div class="fw-semibold">
-              <% @customer.customer_contacts.each do |person| %>
-                <div><%= person.name %> (<%= person.email %>)</div>
-              <% end %>
-            </div>
-          <% else %>
-            <div class="fw-semibold">-</div>
-          <% end %>
+        <div class="col-md-2">
+          <div class="text-body-secondary small">Travel budget</div>
+          <div class="fw-semibold"><%= @customer.travel_budget.present? ? number_to_currency(@customer.travel_budget) : "-" %></div>
         </div>
         <div class="col-md-3">
           <div class="text-body-secondary small">Monthly engagement</div>
@@ -103,10 +103,11 @@
           <% monthly_target = @customer.travel_budget.present? ? (@customer.travel_budget.to_d / 12) : nil %>
           <div class="fw-semibold">
             <% if monthly_percentage.present? && monthly_target.present? %>
-              <%= number_to_percentage(monthly_percentage, precision: 1) %>
-              <div class="small text-body-secondary">
-                <%= number_to_currency(@customer.monthly_gmv_total) %> / <%= number_to_currency(monthly_target) %>
-              </div>
+              <span
+                title="<%= number_to_currency(@customer.monthly_gmv_total) %> / <%= number_to_currency(monthly_target) %>"
+              >
+                <%= number_to_percentage(monthly_percentage, precision: 1) %>
+              </span>
             <% else %>
               -
             <% end %>
@@ -118,10 +119,11 @@
           <% quarterly_target = @customer.travel_budget.present? ? (@customer.travel_budget.to_d / 4) : nil %>
           <div class="fw-semibold">
             <% if quarterly_percentage.present? && quarterly_target.present? %>
-              <%= number_to_percentage(quarterly_percentage, precision: 1) %>
-              <div class="small text-body-secondary">
-                <%= number_to_currency(@customer.quarterly_gmv_total) %> / <%= number_to_currency(quarterly_target) %>
-              </div>
+              <span
+                title="<%= number_to_currency(@customer.quarterly_gmv_total) %> / <%= number_to_currency(quarterly_target) %>"
+              >
+                <%= number_to_percentage(quarterly_percentage, precision: 1) %>
+              </span>
             <% else %>
               -
             <% end %>
