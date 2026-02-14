@@ -49,6 +49,11 @@ class CustomerSuccessManagersController < ApplicationController
 
   # DELETE /customer_success_managers/1 or /customer_success_managers/1.json
   def destroy
+    if @customer_success_manager == current_customer_success_manager
+      redirect_to customer_success_managers_path, alert: "You cannot delete your own account.", status: :see_other
+      return
+    end
+
     @customer_success_manager.destroy!
 
     respond_to do |format|

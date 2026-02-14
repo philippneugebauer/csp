@@ -62,4 +62,12 @@ class CustomerSuccessManagersControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to customer_success_managers_url
   end
+
+  test "should not destroy current customer_success_manager" do
+    assert_no_difference("CustomerSuccessManager.count") do
+      delete customer_success_manager_url(@customer_success_manager)
+    end
+
+    assert_redirected_to customer_success_managers_url
+  end
 end
