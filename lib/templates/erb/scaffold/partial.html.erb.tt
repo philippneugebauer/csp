@@ -2,12 +2,12 @@
   <dl class="row mb-0">
 <% attributes.reject(&:password_digest?).each do |attribute| -%>
     <dt class="col-sm-3"><%= attribute.human_name %></dt>
-    <dd class="col-sm-9">
+    <dd class="col-sm-9 text-sm-end">
 <% if attribute.attachment? -%>
       <%%= link_to <%= singular_name %>.<%= attribute.column_name %>.filename, <%= singular_name %>.<%= attribute.column_name %> if <%= singular_name %>.<%= attribute.column_name %>.attached? %>
 <% elsif attribute.attachments? -%>
       <%% <%= singular_name %>.<%= attribute.column_name %>.each do |<%= attribute.singular_name %>| %>
-        <div><%%= link_to <%= attribute.singular_name %>.filename, <%= attribute.singular_name %> %></div>
+        <div class="text-sm-end"><%%= link_to <%= attribute.singular_name %>.filename, <%= attribute.singular_name %> %></div>
       <%% end %>
 <% else -%>
       <%%= <%= singular_name %>.<%= attribute.column_name %> %>
