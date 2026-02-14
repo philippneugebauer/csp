@@ -74,6 +74,31 @@ class CustomersControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "should get customer history" do
+    patch customer_url(@customer), params: {
+      customer: {
+        name: "Acme Updated",
+        stage: @customer.stage,
+        churn_risk: @customer.churn_risk,
+        customer_success_manager_id: @customer.customer_success_manager_id,
+        customer_contacts_attributes: {
+          "0" => {
+            id: @customer.customer_contacts.first.id,
+            name: @customer.customer_contacts.first.name,
+            email: @customer.customer_contacts.first.email
+          }
+        }
+      }
+    }
+
+    get history_customer_url(@customer)
+    assert_response :success
+    assert_includes response.body, "Customer History"
+    assert_includes response.body, "Update"
+    assert_includes response.body, "Name"
+    assert_includes response.body, "Acme Updated"
+  end
+
   test "should hide completed tasks by default and show when requested" do
     manager = customer_success_managers(:one)
     TaskActivity.create!(

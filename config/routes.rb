@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   delete "logout", to: "sessions#destroy"
 
   resources :customers do
+    get :history, on: :member
     resources :customer_notes, only: :create
     resources :customer_documents, only: :create
     resources :customer_tasks, only: :create do

@@ -1,0 +1,57 @@
+<% content_for :title, "#{@customer.name} History" %>
+
+<div class="container py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h1 class="h2 mb-0">Customer History</h1>
+      <div class="text-body-secondary"><%= @customer.name %></div>
+    </div>
+    <div class="d-flex gap-2">
+      <%= link_to customer_path(@customer), class: "btn btn-outline-primary" do %>
+        <i class="bi bi-arrow-left me-1"></i>Back to customer
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card shadow-sm overflow-hidden">
+    <div class="card-header bg-body-tertiary fw-semibold">Change log</div>
+
+    <div class="list-group list-group-flush">
+      <% @versions.each do |version| %>
+        <div class="list-group-item">
+          <div class="d-flex justify-content-between align-items-start gap-3">
+            <div class="w-100">
+              <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+                <% event_badge_class = version.event == "create" ? "text-bg-success" : version.event == "destroy" ? "text-bg-danger" : "text-bg-secondary" %>
+                <span class="badge <%= event_badge_class %>"><%= version.event.humanize %></span>
+                <span class="small text-body-secondary"><%= @version_actors.fetch(version.whodunnit.to_s, "System") %></span>
+              </div>
+
+              <% changes = @version_changes.fetch(version.id, {}) %>
+              <% if changes.any? %>
+                <ul class="mb-0">
+                  <% changes.each do |attribute, values| %>
+                    <li>
+                      <strong><%= attribute.humanize %></strong>
+                      <span class="text-body-secondary">from</span>
+                      <code><%= values.first.inspect %></code>
+                      <span class="text-body-secondary">to</span>
+                      <code><%= values.last.inspect %></code>
+                    </li>
+                  <% end %>
+                </ul>
+              <% else %>
+                <div class="text-body-secondary small">No field-level changes captured.</div>
+              <% end %>
+            </div>
+            <div class="small text-body-secondary text-nowrap"><%= l(version.created_at, format: :short) %></div>
+          </div>
+        </div>
+      <% end %>
+
+      <% if @versions.empty? %>
+        <div class="list-group-item text-body-secondary">No change history yet.</div>
+      <% end %>
+    </div>
+  </div>
+</div>

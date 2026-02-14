@@ -1,4 +1,9 @@
 class Customer < ApplicationRecord
+  if defined?(::PaperTrail::Model)
+    include ::PaperTrail::Model unless respond_to?(:has_paper_trail)
+    has_paper_trail
+  end
+
   belongs_to :customer_success_manager
   has_many :activities, dependent: :destroy
   has_many :note_activities, -> { where(type: "NoteActivity") }, class_name: "Activity", dependent: :destroy

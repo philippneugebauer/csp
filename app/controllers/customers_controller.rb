@@ -1,5 +1,5 @@
 class CustomersController < ApplicationController
-  before_action :set_customer, only: %i[ show edit update destroy sync_emails ]
+  before_action :set_customer, only: %i[ show edit update destroy sync_emails history ]
 
   # GET /customers or /customers.json
   def index
@@ -115,6 +115,20 @@ class CustomersController < ApplicationController
     redirect_to @customer, notice: "Gmail sync has been queued."
   end
 
+  # GET /customers/1/history
+  def history
+    versions_asc = @customer.versions.order(:created_at, :id).to_a
+    @versions = versions_asc.reverse
+    @version_actors = CustomerSuccessManager
+      .where(id: versions_asc.map(&:whodunnit).compact)
+      .index_by { |csm| csm.id.to_s }
+      .transform_values(&:full_name)
+    @version_changes = versions_asc.each_with_index.each_with_object({}) do |(version, index), hash|
+      changes = version.changeset.to_h.except("created_at", "updated_at")
+      hash[version.id] = changes.presence || computed_version_changes(version:, versions_asc:, index:)
+    end
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_customer
@@ -142,5 +156,46 @@ class CustomersController < ApplicationController
 
       permitted[:customer_contacts_attributes] = sanitized_contacts
       permitted
+    end
+
+    def computed_version_changes(version:, versions_asc:, index:)
+      before_attributes = case version.event
+      when "create"
+        {}
+      else
+        deserialize_version_object(version.object)
+      end
+
+      after_attributes = case version.event
+      when "destroy"
+        {}
+      else
+        next_version = versions_asc[index + 1]
+        deserialize_version_object(next_version&.object).presence || @customer.attributes.to_h
+      end
+
+      ignored_keys = %w[created_at updated_at]
+      candidate_keys = (before_attributes.keys | after_attributes.keys) - ignored_keys
+
+      candidate_keys.each_with_object({}) do |attribute, changes|
+        from = before_attributes[attribute]
+        to = after_attributes[attribute]
+        next if from == to
+
+        changes[attribute] = [ from, to ]
+      end
+    end
+
+    def deserialize_version_object(raw_object)
+      return {} if raw_object.blank?
+
+      deserialized = PaperTrail.serializer.load(raw_object)
+      return deserialized.to_h if deserialized.respond_to?(:to_h)
+
+      {}
+    rescue Psych::DisallowedClass
+      YAML.unsafe_load(raw_object).to_h
+    rescue StandardError
+      {}
     end
 end
