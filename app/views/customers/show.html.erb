@@ -90,34 +90,64 @@
   <div class="card shadow-sm mb-3">
     <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center gap-2">
       <span class="fw-semibold">Task</span>
-      <button
-        class="btn btn-sm btn-outline-primary"
-        type="button"
-        data-bs-toggle="modal"
-        data-bs-target="#addTaskModal"
-      >
-        <i class="bi bi-list-check me-1"></i>Add task
-      </button>
+      <div class="d-flex align-items-center gap-2">
+        <% if @show_completed_tasks %>
+          <%= link_to customer_path(@customer, request.query_parameters.except("show_completed_tasks")), class: "btn btn-sm btn-outline-secondary" do %>
+            Hide completed
+          <% end %>
+        <% else %>
+          <%= link_to customer_path(@customer, request.query_parameters.merge("show_completed_tasks" => "1")), class: "btn btn-sm btn-outline-secondary" do %>
+            Show completed
+          <% end %>
+        <% end %>
+        <button
+          class="btn btn-sm btn-outline-primary"
+          type="button"
+          data-bs-toggle="modal"
+          data-bs-target="#addTaskModal"
+        >
+          <i class="bi bi-list-check me-1"></i>Add task
+        </button>
+      </div>
     </div>
     <ul class="list-group list-group-flush">
       <% @task_activities.each do |task| %>
         <li class="list-group-item d-flex justify-content-between align-items-start gap-3">
           <div>
-            <div class="mb-1"><span class="badge text-bg-dark">Task</span></div>
-            <div><%= simple_format(task.body) %></div>
+            <div class="mb-1 d-flex align-items-center gap-2">
+              <span class="badge <%= task.completed? ? "text-bg-success" : "text-bg-dark" %>">
+                <%= task.completed? ? "Completed" : "Task" %>
+              </span>
+              <% if task.completed_at.present? %>
+                <span class="small text-body-secondary">Completed <%= l(task.completed_at, format: :short) %></span>
+              <% end %>
+            </div>
+            <div class="<%= task.completed? ? "text-decoration-line-through text-body-secondary" : "" %>"><%= simple_format(task.body) %></div>
             <div class="small text-body-secondary"><%= task.customer_success_manager.full_name %></div>
           </div>
-          <div class="small text-body-secondary text-nowrap"><%= l(task.occurred_at, format: :short) %></div>
+          <div class="d-flex align-items-start gap-2">
+            <% unless task.completed? %>
+              <%= button_to complete_customer_customer_task_path(@customer, task, request.query_parameters.slice("activity_type", "email_direction", "show_completed_tasks")),
+                method: :patch,
+                class: "btn btn-sm btn-outline-success",
+                form: { class: "d-inline" } do %>
+                Complete
+              <% end %>
+            <% end %>
+            <div class="small text-body-secondary text-nowrap"><%= l(task.occurred_at, format: :short) %></div>
+          </div>
         </li>
       <% end %>
       <% if @task_activities.empty? %>
-        <li class="list-group-item text-body-secondary">No tasks yet.</li>
+        <li class="list-group-item text-body-secondary">
+          <%= @show_completed_tasks ? "No tasks yet." : "No open tasks." %>
+        </li>
       <% end %>
     </ul>
   </div>
 
   <div class="card shadow-sm mb-3">
-    <div class="card-header bg-body-tertiary fw-semibold">Add CSM note</div>
+    <div class="card-header bg-body-tertiary fw-semibold">Add note</div>
     <div class="card-body">
       <%= form_with(url: customer_customer_notes_path(@customer), scope: :customer_note, data: { turbo_temporary: true }) do |form| %>
         <div class="row g-3">

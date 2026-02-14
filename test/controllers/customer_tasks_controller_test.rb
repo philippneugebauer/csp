@@ -33,4 +33,18 @@ class CustomerTasksControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to customer_url(@customer)
   end
+
+  test "completes task activity" do
+    task = TaskActivity.create!(
+      customer: @customer,
+      customer_success_manager: @manager,
+      body: "Follow up with legal",
+      occurred_at: Time.current
+    )
+
+    patch complete_customer_customer_task_url(@customer, task)
+
+    assert_redirected_to customer_url(@customer)
+    assert task.reload.completed_at.present?
+  end
 end

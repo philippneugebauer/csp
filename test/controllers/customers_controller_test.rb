@@ -74,6 +74,32 @@ class CustomersControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "should hide completed tasks by default and show when requested" do
+    manager = customer_success_managers(:one)
+    TaskActivity.create!(
+      customer: @customer,
+      customer_success_manager: manager,
+      body: "Open task visible",
+      occurred_at: Time.current
+    )
+    TaskActivity.create!(
+      customer: @customer,
+      customer_success_manager: manager,
+      body: "Completed task hidden",
+      occurred_at: Time.current,
+      completed_at: Time.current
+    )
+
+    get customer_url(@customer)
+    assert_response :success
+    assert_includes response.body, "Open task visible"
+    assert_not_includes response.body, "Completed task hidden"
+
+    get customer_url(@customer), params: { show_completed_tasks: "1" }
+    assert_response :success
+    assert_includes response.body, "Completed task hidden"
+  end
+
   test "should get edit" do
     get edit_customer_url(@customer)
     assert_response :success

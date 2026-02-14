@@ -3,6 +3,7 @@ class Customer < ApplicationRecord
   has_many :activities, dependent: :destroy
   has_many :note_activities, -> { where(type: "NoteActivity") }, class_name: "Activity", dependent: :destroy
   has_many :email_activities, -> { where(type: "EmailActivity") }, class_name: "Activity", dependent: :destroy
+  has_many :task_activities, -> { where(type: "TaskActivity") }, class_name: "TaskActivity", dependent: :destroy
   has_many :customer_contacts, dependent: :destroy
 
   accepts_nested_attributes_for :customer_contacts, allow_destroy: true, reject_if: :all_blank

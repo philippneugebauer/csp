@@ -34,18 +34,16 @@ class CustomersController < ApplicationController
   def show
     @activity_type = params[:activity_type].presence_in(%w[all notes documents emails]) || "all"
     @email_direction = params[:email_direction].presence_in(%w[all inbound outbound]) || "all"
+    @show_completed_tasks = ActiveModel::Type::Boolean.new.cast(params[:show_completed_tasks])
 
     @customer_note = NoteActivity.new(
       customer: @customer,
       customer_success_manager: current_customer_success_manager,
       occurred_at: Time.current
     )
-    @customer_task = TaskActivity.new(
-      customer: @customer,
-      customer_success_manager: current_customer_success_manager,
-      occurred_at: Time.current
-    )
-    @task_activities = @customer.activities.where(type: "TaskActivity").includes(:customer_success_manager).recent_first.limit(10)
+    @task_activities = @customer.task_activities.includes(:customer_success_manager).recent_first
+    @task_activities = @task_activities.incomplete unless @show_completed_tasks
+    @task_activities = @task_activities.limit(10)
 
     @activities = @customer.activities
       .where.not(type: "TaskActivity")
