@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  resource :session, only: %i[ new create destroy ]
+  get "login", to: "sessions#new"
+  delete "logout", to: "sessions#destroy"
+
   resources :customers do
     resources :customer_notes, only: :create
     post :sync_emails, on: :member

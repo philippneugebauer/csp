@@ -3,7 +3,7 @@ class CustomerSuccessManagersController < ApplicationController
 
   # GET /customer_success_managers or /customer_success_managers.json
   def index
-    @customer_success_managers = CustomerSuccessManager.all
+    @customer_success_managers = CustomerSuccessManager.order(:first_name, :last_name)
   end
 
   # GET /customer_success_managers/1 or /customer_success_managers/1.json
@@ -65,6 +65,6 @@ class CustomerSuccessManagersController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def customer_success_manager_params
-      params.expect(customer_success_manager: [ :first_name, :last_name, :email ])
+      params.expect(customer_success_manager: [ :first_name, :last_name, :email, :password, :password_confirmation ])
     end
 end

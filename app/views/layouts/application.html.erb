@@ -11,19 +11,36 @@
 
     <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
   <body>
+    <% if authenticated? %>
+      <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom mb-3">
+        <div class="container">
+          <%= link_to "CSP", root_path, class: "navbar-brand fw-semibold" %>
+          <div class="d-flex align-items-center gap-2 ms-auto">
+            <span class="text-body-secondary small"><%= current_customer_success_manager.full_name %></span>
+            <%= button_to "Logout", logout_path, method: :delete, class: "btn btn-sm btn-outline-secondary" %>
+          </div>
+        </div>
+      </nav>
+    <% end %>
+
+    <div class="container">
+      <% if notice.present? %>
+        <div class="alert alert-success" role="alert"><%= notice %></div>
+      <% end %>
+      <% if alert.present? %>
+        <div class="alert alert-danger" role="alert"><%= alert %></div>
+      <% end %>
+    </div>
+
     <%= yield %>
   </body>
 </html>

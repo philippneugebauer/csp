@@ -3,6 +3,7 @@ require "test_helper"
 class CustomersControllerTest < ActionDispatch::IntegrationTest
   setup do
     @customer = customers(:one)
+    sign_in_as(customer_success_managers(:one))
   end
 
   test "should get index" do
@@ -17,7 +18,7 @@ class CustomersControllerTest < ActionDispatch::IntegrationTest
 
   test "should create customer" do
     assert_difference("Customer.count") do
-      post customers_url, params: { customer: { churn_risk: @customer.churn_risk, customer_success_manager_id: @customer.customer_success_manager_id, name: @customer.name, primary_contact_email: @customer.primary_contact_email, stage: @customer.stage } }
+      post customers_url, params: { customer: { churn_risk: @customer.churn_risk, customer_success_manager_id: @customer.customer_success_manager_id, name: "NewCo", primary_contact_email: "newco@example.com", stage: @customer.stage } }
     end
 
     assert_redirected_to customer_url(Customer.last)

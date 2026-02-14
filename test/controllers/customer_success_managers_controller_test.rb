@@ -3,6 +3,7 @@ require "test_helper"
 class CustomerSuccessManagersControllerTest < ActionDispatch::IntegrationTest
   setup do
     @customer_success_manager = customer_success_managers(:one)
+    sign_in_as(@customer_success_manager)
   end
 
   test "should get index" do
@@ -17,7 +18,15 @@ class CustomerSuccessManagersControllerTest < ActionDispatch::IntegrationTest
 
   test "should create customer_success_manager" do
     assert_difference("CustomerSuccessManager.count") do
-      post customer_success_managers_url, params: { customer_success_manager: { email: @customer_success_manager.email, first_name: @customer_success_manager.first_name, last_name: @customer_success_manager.last_name } }
+      post customer_success_managers_url, params: {
+        customer_success_manager: {
+          email: "new_manager@example.com",
+          first_name: "New",
+          last_name: "Manager",
+          password: "password",
+          password_confirmation: "password"
+        }
+      }
     end
 
     assert_redirected_to customer_success_manager_url(CustomerSuccessManager.last)
@@ -34,13 +43,21 @@ class CustomerSuccessManagersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update customer_success_manager" do
-    patch customer_success_manager_url(@customer_success_manager), params: { customer_success_manager: { email: @customer_success_manager.email, first_name: @customer_success_manager.first_name, last_name: @customer_success_manager.last_name } }
+    patch customer_success_manager_url(@customer_success_manager), params: {
+      customer_success_manager: {
+        email: @customer_success_manager.email,
+        first_name: @customer_success_manager.first_name,
+        last_name: @customer_success_manager.last_name
+      }
+    }
     assert_redirected_to customer_success_manager_url(@customer_success_manager)
   end
 
   test "should destroy customer_success_manager" do
+    manager = customer_success_managers(:two)
+
     assert_difference("CustomerSuccessManager.count", -1) do
-      delete customer_success_manager_url(@customer_success_manager)
+      delete customer_success_manager_url(manager)
     end
 
     assert_redirected_to customer_success_managers_url

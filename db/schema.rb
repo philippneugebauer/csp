@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_14_164231) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_14_175500) do
   create_table "customer_email_messages", force: :cascade do |t|
     t.text "body_text"
     t.datetime "created_at", null: false
@@ -50,7 +50,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_14_164231) do
     t.string "email"
     t.string "first_name"
     t.string "last_name"
+    t.string "password_digest"
     t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_customer_success_managers_on_email"
   end
 
   create_table "customers", force: :cascade do |t|

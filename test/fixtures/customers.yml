@@ -1,15 +1,15 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
-  primary_contact_email: MyString
-  stage: 1
-  churn_risk: 1
+  name: Acme Inc
+  primary_contact_email: contact1@example.com
+  stage: adoption
+  churn_risk: medium
   customer_success_manager: one
 
 two:
-  name: MyString
-  primary_contact_email: MyString
-  stage: 1
-  churn_risk: 1
+  name: Globex
+  primary_contact_email: contact2@example.com
+  stage: renewal
+  churn_risk: high
   customer_success_manager: two
