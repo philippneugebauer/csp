@@ -11,5 +11,6 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
 
     get root_url
     assert_response :success
+    assert_includes response.body, "/customers?churn_risk=high"
   end
 end

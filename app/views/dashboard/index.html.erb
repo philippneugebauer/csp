@@ -15,28 +15,28 @@
 
   <div class="row g-3 mb-4">
     <div class="col-sm-6 col-lg-3">
-      <div class="card shadow-sm h-100">
+      <%= link_to customers_path, class: "card shadow-sm h-100 text-decoration-none text-reset" do %>
         <div class="card-body">
           <div class="text-body-secondary small">Total customers</div>
           <div class="display-6 fw-semibold"><%= @customers_count %></div>
         </div>
-      </div>
+      <% end %>
     </div>
     <div class="col-sm-6 col-lg-3">
-      <div class="card shadow-sm h-100">
+      <%= link_to customers_path(churn_risk: "high"), class: "card shadow-sm h-100 text-decoration-none text-reset" do %>
         <div class="card-body">
           <div class="text-body-secondary small">High churn risk</div>
           <div class="display-6 fw-semibold text-danger"><%= @high_risk_count %></div>
         </div>
-      </div>
+      <% end %>
     </div>
     <div class="col-sm-6 col-lg-3">
-      <div class="card shadow-sm h-100">
+      <%= link_to customers_path(stage: "renewal"), class: "card shadow-sm h-100 text-decoration-none text-reset" do %>
         <div class="card-body">
           <div class="text-body-secondary small">In renewal stage</div>
           <div class="display-6 fw-semibold"><%= @renewal_count %></div>
         </div>
-      </div>
+      <% end %>
     </div>
     <div class="col-sm-6 col-lg-3">
       <div class="card shadow-sm h-100">
@@ -55,8 +55,8 @@
         <ul class="list-group list-group-flush">
           <% Customer.stages.keys.each do |stage_key| %>
             <li class="list-group-item d-flex justify-content-between align-items-center">
-              <span><%= stage_key.humanize %></span>
-              <span class="badge text-bg-secondary"><%= @customers_by_stage.fetch(stage_key, 0) %></span>
+              <%= link_to stage_key.humanize, customers_path(stage: stage_key), class: "text-decoration-none" %>
+              <%= link_to @customers_by_stage.fetch(stage_key, 0), customers_path(stage: stage_key), class: "badge text-bg-secondary text-decoration-none" %>
             </li>
           <% end %>
         </ul>
@@ -70,8 +70,8 @@
           <% Customer.churn_risks.keys.each do |risk_key| %>
             <% badge_class = risk_key == "high" ? "text-bg-danger" : risk_key == "medium" ? "text-bg-warning" : "text-bg-success" %>
             <li class="list-group-item d-flex justify-content-between align-items-center">
-              <span><%= risk_key.humanize %></span>
-              <span class="badge <%= badge_class %>"><%= @customers_by_risk.fetch(risk_key, 0) %></span>
+              <%= link_to risk_key.humanize, customers_path(churn_risk: risk_key), class: "text-decoration-none" %>
+              <%= link_to @customers_by_risk.fetch(risk_key, 0), customers_path(churn_risk: risk_key), class: "badge #{badge_class} text-decoration-none" %>
             </li>
           <% end %>
         </ul>
@@ -82,7 +82,10 @@
   <div class="row g-3">
     <div class="col-lg-6">
       <div class="card shadow-sm h-100 overflow-hidden">
-        <div class="card-header bg-body-tertiary fw-semibold">At-risk customers</div>
+        <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">At-risk customers</span>
+          <%= link_to "View all", customers_path(churn_risk: "high"), class: "btn btn-sm btn-outline-danger" %>
+        </div>
         <% if @at_risk_customers.any? %>
           <div class="table-responsive">
             <table class="table table-sm align-middle mb-0">
