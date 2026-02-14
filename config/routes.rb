@@ -5,6 +5,7 @@ Rails.application.routes.draw do
 
   resources :customers do
     get :history, on: :member
+    get :gmv_trend, on: :member
     resources :customer_notes, only: :create
     resources :customer_documents, only: :create
     resources :customer_gmv_activities, only: :create

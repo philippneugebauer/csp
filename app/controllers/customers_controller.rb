@@ -1,5 +1,5 @@
 class CustomersController < ApplicationController
-  before_action :set_customer, only: %i[ show edit update destroy sync_emails history ]
+  before_action :set_customer, only: %i[ show edit update destroy sync_emails history gmv_trend ]
 
   # GET /customers or /customers.json
   def index
@@ -129,6 +129,16 @@ class CustomersController < ApplicationController
       changes = version.changeset.to_h.except("created_at", "updated_at")
       hash[version.id] = changes.presence || computed_version_changes(version:, versions_asc:, index:)
     end
+  end
+
+  # GET /customers/1/gmv_trend
+  def gmv_trend
+    @gmv_series = @customer.gmv_activities
+      .where.not(gmv_on: nil)
+      .group(:gmv_on)
+      .sum(:gmv_revenue)
+      .sort
+      .to_h
   end
 
   private

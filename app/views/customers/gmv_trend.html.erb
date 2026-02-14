@@ -1,0 +1,106 @@
+<% content_for :title, "#{@customer.name} GMV Trend" %>
+
+<div class="container py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h1 class="h2 mb-0">GMV Trend</h1>
+      <div class="text-body-secondary"><%= @customer.name %></div>
+    </div>
+    <div class="d-flex gap-2">
+      <%= link_to customer_path(@customer), class: "btn btn-outline-primary" do %>
+        <i class="bi bi-arrow-left me-1"></i>Back to customer
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-header bg-body-tertiary fw-semibold">Daily GMV</div>
+    <div class="card-body">
+      <% if @gmv_series.any? %>
+        <% width = 960 %>
+        <% height = 320 %>
+        <% padding = 36 %>
+        <% values = @gmv_series.values.map(&:to_f) %>
+        <% max_value = values.max.to_f %>
+        <% max_value = 1.0 if max_value <= 0 %>
+        <% y_ticks = 4 %>
+        <% x_series = @gmv_series.to_a %>
+        <% points = @gmv_series.values.each_with_index.map do |value, index|
+          x = if @gmv_series.size == 1
+            width / 2.0
+          else
+            padding + (index.to_f * (width - (padding * 2)) / (@gmv_series.size - 1))
+          end
+          y = height - padding - ((value.to_f / max_value) * (height - (padding * 2)))
+          "#{x.round(2)},#{y.round(2)}"
+        end %>
+
+        <div class="border rounded p-2 overflow-auto">
+          <svg viewBox="0 0 <%= width %> <%= height %>" width="100%" height="320" role="img" aria-label="GMV trend chart">
+            <line x1="<%= padding %>" y1="<%= height - padding %>" x2="<%= width - padding %>" y2="<%= height - padding %>" stroke="currentColor" stroke-opacity="0.35" />
+            <line x1="<%= padding %>" y1="<%= padding %>" x2="<%= padding %>" y2="<%= height - padding %>" stroke="currentColor" stroke-opacity="0.35" />
+
+            <% (0..y_ticks).each do |tick| %>
+              <% value = max_value * (tick.to_f / y_ticks) %>
+              <% y = height - padding - ((value / max_value) * (height - (padding * 2))) %>
+              <line x1="<%= padding %>" y1="<%= y.round(2) %>" x2="<%= width - padding %>" y2="<%= y.round(2) %>" stroke="currentColor" stroke-opacity="0.12" />
+              <text x="<%= padding - 8 %>" y="<%= (y + 4).round(2) %>" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.7">
+                <%= number_to_currency(value, precision: 0) %>
+              </text>
+            <% end %>
+
+            <polyline fill="none" stroke="currentColor" stroke-width="2.5" points="<%= points.join(' ') %>" />
+
+            <% x_series.each_with_index do |(day, value), index| %>
+              <% x = if @gmv_series.size == 1
+                width / 2.0
+              else
+                padding + (index.to_f * (width - (padding * 2)) / (@gmv_series.size - 1))
+              end %>
+              <% y = height - padding - ((value.to_f / max_value) * (height - (padding * 2))) %>
+              <circle cx="<%= x.round(2) %>" cy="<%= y.round(2) %>" r="3.5" fill="currentColor" />
+              <text x="<%= x.round(2) %>" y="<%= height - padding + 16 %>" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.7">
+                <%= l(day, format: "%m-%d") %>
+              </text>
+            <% end %>
+          </svg>
+        </div>
+
+        <div class="small text-body-secondary mt-2">
+          <strong>Range:</strong>
+          <%= l(@gmv_series.keys.first) %> - <%= l(@gmv_series.keys.last) %>
+          · <strong>Peak:</strong> <%= number_to_currency(@gmv_series.values.max) %>
+        </div>
+      <% else %>
+        <div class="text-body-secondary">No GMV activity data available yet.</div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card shadow-sm overflow-hidden">
+    <div class="card-header bg-body-tertiary fw-semibold">GMV by day</div>
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Date</th>
+            <th class="text-end">Revenue</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @gmv_series.each do |day, value| %>
+            <tr>
+              <td><%= l(day) %></td>
+              <td class="text-end"><%= number_to_currency(value) %></td>
+            </tr>
+          <% end %>
+          <% if @gmv_series.empty? %>
+            <tr>
+              <td colspan="2" class="text-body-secondary">No entries yet.</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

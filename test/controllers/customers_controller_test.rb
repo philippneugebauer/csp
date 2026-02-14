@@ -74,6 +74,28 @@ class CustomersControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "should show gmv trend page" do
+    manager = customer_success_managers(:one)
+    GmvActivity.create!(
+      customer: @customer,
+      customer_success_manager: manager,
+      gmv_on: Date.new(2026, 2, 13),
+      gmv_revenue: 1000
+    )
+    GmvActivity.create!(
+      customer: @customer,
+      customer_success_manager: manager,
+      gmv_on: Date.new(2026, 2, 14),
+      gmv_revenue: 1250
+    )
+
+    get gmv_trend_customer_url(@customer)
+    assert_response :success
+    assert_includes response.body, "GMV Trend"
+    assert_includes response.body, "2026-02-13"
+    assert_includes response.body, "2026-02-14"
+  end
+
   test "should get customer history" do
     patch customer_url(@customer), params: {
       customer: {
