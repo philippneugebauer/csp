@@ -1,0 +1,1 @@
+json.partial! "customer_success_managers/customer_success_manager", customer_success_manager: @customer_success_manager

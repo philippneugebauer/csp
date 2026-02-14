@@ -1,0 +1,2 @@
+class CustomerSuccessManager < ApplicationRecord
+end
