@@ -24,6 +24,14 @@
       <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom mb-3">
         <div class="container">
           <%= link_to "CSP", root_path, class: "navbar-brand fw-semibold" %>
+          <ul class="navbar-nav ms-2">
+            <li class="nav-item">
+              <%= link_to "Customers", customers_path, class: "nav-link" %>
+            </li>
+            <li class="nav-item">
+              <%= link_to "Customer Success Managers", customer_success_managers_path, class: "nav-link" %>
+            </li>
+          </ul>
           <div class="d-flex align-items-center gap-2 ms-auto">
             <span class="text-body-secondary small"><%= current_customer_success_manager.full_name %></span>
             <%= button_to "Logout", logout_path, method: :delete, class: "btn btn-sm btn-outline-secondary" %>
