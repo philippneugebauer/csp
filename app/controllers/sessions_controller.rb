@@ -9,6 +9,7 @@ class SessionsController < ApplicationController
     customer_success_manager = CustomerSuccessManager.active.find_by(email: params[:email].to_s.downcase.strip)
 
     if customer_success_manager&.authenticate(params[:password])
+      reset_session
       session[:customer_success_manager_id] = customer_success_manager.id
       redirect_to root_path, notice: "Welcome back, #{customer_success_manager.first_name}."
     else
@@ -18,7 +19,7 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    session.delete(:customer_success_manager_id)
+    reset_session
     redirect_to login_path, notice: "Logged out successfully."
   end
 end
