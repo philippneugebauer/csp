@@ -29,7 +29,11 @@ module Gmail
         payload = gmail_get("/messages/#{gmail_message_id}", format: "full")
         headers = headers_hash(payload)
 
-        record = EmailActivity.find_or_initialize_by(gmail_message_id: gmail_message_id)
+        record = EmailActivity.find_or_initialize_by(
+          customer_id: @customer.id,
+          gmail_message_id: gmail_message_id
+        )
+
         record.customer = @customer
         record.customer_success_manager = @customer.customer_success_manager
         record.occurred_at = parse_datetime(headers["date"])

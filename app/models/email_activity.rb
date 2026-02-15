@@ -4,7 +4,7 @@ class EmailActivity < Activity
     outbound: 1
   }, default: :inbound
 
-  validates :gmail_message_id, presence: true, uniqueness: true
+  validates :gmail_message_id, presence: true, uniqueness: { scope: :customer_id }
 
   before_validation :set_occurred_at, on: :create
 
