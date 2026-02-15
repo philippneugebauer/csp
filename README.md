@@ -1,24 +1,17 @@
-# README
+# CSP
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Static Code Analysis
 
-Things you may want to cover:
+Run all static checks:
 
-* Ruby version
+```bash
+bin/static_analysis
+```
 
-* System dependencies
+This runs:
 
-* Configuration
+- `bin/rubocop`
+- `bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error`
+- `bin/bundler-audit check`
 
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+The same checks are also part of `bin/ci`.
